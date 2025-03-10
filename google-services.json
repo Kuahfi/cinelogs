@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "529398254722",
+    "project_id": "cinelogs-f1fd1",
+    "storage_bucket": "cinelogs-f1fd1.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:529398254722:android:8e742f14fe237470d4389b",
+        "android_client_info": {
+          "package_name": "com.z0diac.tesapi"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "529398254722-di0183cj021ie80v1cj9r23lgah6ijsa.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA8IfHmHUMmfJv5It3gav-yAYyFqcdH-To"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "529398254722-di0183cj021ie80v1cj9r23lgah6ijsa.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
