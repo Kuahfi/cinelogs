@@ -8,13 +8,26 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <!-- Layer Gradient Overlay untuk meningkatkan keterbacaan teks -->
+    <!-- Layer Gradient Overlay -->
     <View
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@drawable/gradient_overlay" />
 
-    <!-- Teks Copywriting -->
+    <!-- Tombol Skip di pojok kanan atas -->
+    <Button
+        android:id="@+id/btnSkip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Skip"
+        android:backgroundTint="@android:color/transparent"
+        android:textColor="@android:color/white"
+        android:layout_gravity="top|end"
+        android:layout_marginTop="40dp"
+        android:layout_marginEnd="10dp"/>
+
+    <!-- Teks Copywriting + Button + Indikator -->
+    <!-- LinearLayout untuk teks dan tombol -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -22,17 +35,17 @@
         android:gravity="center_horizontal"
         android:layout_gravity="bottom"
         android:padding="24dp"
-        android:layout_marginBottom="120dp"> <!-- Tambahkan margin agar lebih ke tengah -->
+        android:layout_marginBottom="40dp"> <!-- Tambahkan margin bawah agar lebih turun -->
 
         <TextView
             android:id="@+id/tvTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Welcome to Our App"
+            android:text="Welcome to Cinelogs"
+            android:textAlignment="textStart"
             android:textSize="24sp"
             android:textStyle="bold"
-            android:textColor="@android:color/white"
-            android:gravity="center"/>
+            android:textColor="@android:color/white"/>
 
         <TextView
             android:id="@+id/tvDescription"
@@ -41,36 +54,29 @@
             android:text="This app will help you achieve your goals with ease."
             android:textSize="16sp"
             android:textColor="@android:color/white"
-            android:gravity="center"
+            android:textAlignment="textStart"
             android:paddingTop="8dp"/>
-    </LinearLayout>
-
-    <!-- LinearLayout untuk tombol di atas gambar -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center"
-        android:layout_gravity="bottom"
-        android:padding="24dp"
-        android:background="@android:color/transparent">
-
-        <Button
-            android:id="@+id/btnSkip"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Skip"
-            android:backgroundTint="@color/white"
-            android:textColor="@color/black"/>
 
         <Button
             android:id="@+id/btnNext"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Next"
             android:backgroundTint="@color/white"
             android:textColor="@color/black"
-            android:layout_marginStart="16dp"/>
+            android:layout_marginTop="20dp"/>
     </LinearLayout>
+
+
+    <!-- Indicator Dots (Dikeluarkan agar menempel di bawah layar) -->
+    <LinearLayout
+        android:id="@+id/indicatorLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_horizontal"
+        android:layout_gravity="bottom"
+        android:layout_marginBottom="40dp"/> <!-- Turunkan ke batas bawah layar -->
+
 
 </FrameLayout>
