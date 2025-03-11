@@ -27,7 +27,7 @@ class OnboardingActivity : AppCompatActivity() {
     )
 
     private val descriptions = arrayOf(
-        "This app will help you achieve your goals with ease.",
+        "Your personal space to track, review, and relive your favorite movies.",
         "Explore and enjoy various features designed for you.",
         "Sign up now and experience the best of our app!"
     )
