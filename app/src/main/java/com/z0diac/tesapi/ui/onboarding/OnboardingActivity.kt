@@ -29,7 +29,7 @@ class OnboardingActivity : AppCompatActivity() {
     private val descriptions = arrayOf(
         "Your personal space to track, review, and relive your favorite movies.",
         "Explore and enjoy various features designed for you.",
-        "Sign up now and experience the best of our app!"
+        "Sign up now and experience the best of our application!"
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {
