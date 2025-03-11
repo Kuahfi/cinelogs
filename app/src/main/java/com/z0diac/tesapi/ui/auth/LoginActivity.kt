@@ -99,12 +99,11 @@ class LoginActivity : AppCompatActivity() {
                     if (posterImageView != null) {
                         Glide.with(this@LoginActivity)
                             .load(imageUrl)
-                            .placeholder(posterImageView.drawable ?: ColorDrawable(0xFF000000.toInt())) // Pakai gambar lama, kalau null pakai hitam
-                            .transition(DrawableTransitionOptions.withCrossFade(1500)) // Smooth fade in 1.5 detik
+                            .placeholder(R.drawable.img_1) // Pakai gambar lama, kalau null pakai hitam
                             .into(posterImageView)
                     }
                 }
-                handler.postDelayed(this, 5000) // Ganti setiap 5 detik
+                handler.postDelayed(this, 10000) // Ganti setiap 10 detik
             }
         })
     }
