@@ -13,33 +13,31 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.TesApi"
         tools:targetApi="31">
-
+        <activity
+            android:name=".ui.onboarding.OnboardingActivity"
+            android:exported="false" />
         <!-- SplashScreen sebagai entry point utama -->
         <activity
             android:name=".splashScreen"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".ui.auth.LoginActivity"
             android:exported="true" />
-
         <activity
             android:name=".ui.auth.RegisterActivity"
             android:exported="false" />
-
         <activity
             android:name=".ui.dashboard.DashboardActivity"
             android:exported="false" />
-
         <activity
             android:name=".MainActivity"
             android:exported="true" />
-
     </application>
 
 </manifest>
