@@ -34,6 +34,15 @@
         android:hint="Password"
         android:inputType="textPassword"/>
 
+    <EditText
+        android:id="@+id/etRegisterConfirmPassword"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Confirm Password"
+        android:inputType="textPassword"
+        android:layout_marginTop="8dp"/>
+
+
     <Button
         android:id="@+id/btnSubmitRegister"
         android:layout_width="match_parent"

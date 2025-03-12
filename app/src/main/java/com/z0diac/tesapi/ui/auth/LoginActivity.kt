@@ -84,20 +84,31 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun signInAnonymously() {
-        auth.signInAnonymously()
-            .addOnCompleteListener(this) { task ->
-                if (task.isSuccessful) {
-                    val user = auth.currentUser
-                    Toast.makeText(this, "Signed in as Anonymous", Toast.LENGTH_SHORT).show()
+        val sharedPref = getSharedPreferences("MyAppPrefs", MODE_PRIVATE)
+        val savedUid = sharedPref.getString("anonymous_uid", null)
 
-                    // Arahkan ke Dashboard / Halaman Utama
-                    startActivity(Intent(this, DashboardActivity::class.java))
-                    finish()
-                } else {
-                    Toast.makeText(this, "Authentication Failed: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
-                }
+        if (savedUid != null) {
+            // Gunakan UID lama (tidak bisa langsung masuk ulang, hanya untuk referensi)
+            Toast.makeText(this, "Welcome back! Your previous UID: $savedUid", Toast.LENGTH_SHORT).show()
+        }
+
+        auth.signInAnonymously().addOnCompleteListener(this) { task ->
+            if (task.isSuccessful) {
+                val user = auth.currentUser
+                val newUid = user?.uid
+
+                // Simpan UID baru
+                sharedPref.edit().putString("anonymous_uid", newUid).apply()
+
+                Toast.makeText(this, "Signed in as Anonymous", Toast.LENGTH_SHORT).show()
+                startActivity(Intent(this, DashboardActivity::class.java))
+                finish()
+            } else {
+                Toast.makeText(this, "Authentication Failed: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
             }
+        }
     }
+
 
     private fun showRegisterDialog() {
         val dialog = BottomSheetDialog(this)
@@ -106,14 +117,21 @@ class LoginActivity : AppCompatActivity() {
         val etName: EditText = view.findViewById(R.id.etRegisterName)
         val etEmail: EditText = view.findViewById(R.id.etRegisterEmail)
         val etPassword: EditText = view.findViewById(R.id.etRegisterPassword)
+        val etConfirmPassword: EditText = view.findViewById(R.id.etRegisterConfirmPassword)
         val btnSubmit: Button = view.findViewById(R.id.btnSubmitRegister)
 
         btnSubmit.setOnClickListener {
             val email = etEmail.text.toString().trim()
             val password = etPassword.text.toString().trim()
+            val confirmPassword = etConfirmPassword.text.toString().trim()
 
             if (email.isEmpty() || password.isEmpty()) {
                 Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            if(password != confirmPassword){
+                Toast.makeText(this, "Passwords do not match!", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
@@ -135,8 +153,6 @@ class LoginActivity : AppCompatActivity() {
                     }
                 }
         }
-
-
         dialog.setContentView(view)
         dialog.show()
     }
