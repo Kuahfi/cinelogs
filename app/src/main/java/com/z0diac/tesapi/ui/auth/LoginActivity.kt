@@ -1,14 +1,14 @@
 package com.z0diac.tesapi.ui.auth
 
-import android.content.Intent
-import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.view.LayoutInflater
+import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
-import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.firebase.auth.FirebaseAuth
 import com.z0diac.tesapi.Movie
 import com.z0diac.tesapi.MovieResponse
@@ -18,6 +18,7 @@ import com.z0diac.tesapi.ui.dashboard.DashboardActivity
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import android.content.Intent
 
 class LoginActivity : AppCompatActivity() {
 
@@ -37,6 +38,10 @@ class LoginActivity : AppCompatActivity() {
         val passwordField = findViewById<EditText>(R.id.etPassword)
         val loginButton = findViewById<Button>(R.id.btnLogin)
         val registerText = findViewById<TextView>(R.id.btnRegister)
+
+        registerText.setOnClickListener {
+            showRegisterDialog()
+        }
 
         loginButton.setOnClickListener {
             val email = emailField.text.toString().trim()
@@ -63,11 +68,49 @@ class LoginActivity : AppCompatActivity() {
                 }
         }
 
-        registerText.setOnClickListener {
-            startActivity(Intent(this, RegisterActivity::class.java))
+        fetchMovies()
+    }
+
+    private fun showRegisterDialog() {
+        val dialog = BottomSheetDialog(this)
+        val view: View = LayoutInflater.from(this).inflate(R.layout.register_dialog, null)
+
+        val etName: EditText = view.findViewById(R.id.etRegisterName)
+        val etEmail: EditText = view.findViewById(R.id.etRegisterEmail)
+        val etPassword: EditText = view.findViewById(R.id.etRegisterPassword)
+        val btnSubmit: Button = view.findViewById(R.id.btnSubmitRegister)
+
+        btnSubmit.setOnClickListener {
+            val email = etEmail.text.toString().trim()
+            val password = etPassword.text.toString().trim()
+
+            if (email.isEmpty() || password.isEmpty()) {
+                Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            auth.createUserWithEmailAndPassword(email, password)
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        val user = auth.currentUser
+                        user?.sendEmailVerification()?.addOnCompleteListener { emailTask ->
+                            if (emailTask.isSuccessful) {
+                                Toast.makeText(this, "Verification email sent!", Toast.LENGTH_LONG).show()
+                                startActivity(Intent(this, LoginActivity::class.java))
+                                finish()
+                            } else {
+                                Toast.makeText(this, "Failed to send verification email.", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    } else {
+                        Toast.makeText(this, "Registration Failed: ${task.exception?.message}", Toast.LENGTH_LONG).show()
+                    }
+                }
         }
 
-        fetchMovies()
+
+        dialog.setContentView(view)
+        dialog.show()
     }
 
     private fun fetchMovies() {
@@ -95,22 +138,20 @@ class LoginActivity : AppCompatActivity() {
                     val randomMovie = movieList.random()
                     val imageUrl = "https://image.tmdb.org/t/p/w500${randomMovie.posterPath}"
 
-                    // Pastikan posterImageView masih ada sebelum memuat gambar
                     if (posterImageView != null) {
                         Glide.with(this@LoginActivity)
                             .load(imageUrl)
-                            .placeholder(posterImageView.drawable ?: ColorDrawable(0xFF000000.toInt())) // Pakai gambar lama, kalau null pakai hitam
-                            .transition(DrawableTransitionOptions.withCrossFade(1500)) // Smooth fade in 1.5 detik
+                            .placeholder(R.drawable.img_1)
                             .into(posterImageView)
                     }
                 }
-                handler.postDelayed(this, 5000) // Ganti setiap 5 detik
+                handler.postDelayed(this, 10000)
             }
         })
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        handler.removeCallbacksAndMessages(null) // Hentikan semua handler agar tidak crash
+        handler.removeCallbacksAndMessages(null)
     }
 }
