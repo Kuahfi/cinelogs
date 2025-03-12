@@ -2,7 +2,7 @@
     android:shape="rectangle">
 
     <!-- Border -->
-    <stroke android:width="2dp" android:color="#205781"/>
+    <stroke android:width="2dp"/>
 
     <!-- Sudut Membulat -->
     <corners android:radius="24dp"/>

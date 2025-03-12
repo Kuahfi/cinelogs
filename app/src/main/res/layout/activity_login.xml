@@ -51,10 +51,9 @@
             android:layout_height="wrap_content"
             android:text="Sign in Anonymously"
             android:textColor="#205781"
+            android:backgroundTint="#205781"
             android:background="@drawable/border_button"
-            android:layout_marginTop="8dp"
-            android:backgroundTint="@android:color/transparent"
-            android:stateListAnimator="@null"/> <!-- Disable default elevation -->
+            android:layout_marginTop="8dp"/>
 
 
         <TextView

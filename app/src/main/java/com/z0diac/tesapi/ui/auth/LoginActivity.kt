@@ -39,6 +39,11 @@ class LoginActivity : AppCompatActivity() {
             return
         }
 
+        val btnAnonymousLogin = findViewById<Button>(R.id.btnAnonymousLogin)
+        btnAnonymousLogin.setOnClickListener {
+            signInAnonymously()
+        }
+
         posterImageView = findViewById(R.id.ivPoster)
 
         val emailField = findViewById<EditText>(R.id.etEmail)
@@ -76,6 +81,22 @@ class LoginActivity : AppCompatActivity() {
         }
 
         fetchMovies()
+    }
+
+    private fun signInAnonymously() {
+        auth.signInAnonymously()
+            .addOnCompleteListener(this) { task ->
+                if (task.isSuccessful) {
+                    val user = auth.currentUser
+                    Toast.makeText(this, "Signed in as Anonymous", Toast.LENGTH_SHORT).show()
+
+                    // Arahkan ke Dashboard / Halaman Utama
+                    startActivity(Intent(this, DashboardActivity::class.java))
+                    finish()
+                } else {
+                    Toast.makeText(this, "Authentication Failed: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
     }
 
     private fun showRegisterDialog() {
