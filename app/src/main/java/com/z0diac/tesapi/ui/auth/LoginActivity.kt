@@ -92,7 +92,7 @@ class LoginActivity : AppCompatActivity() {
         val savedUid = sharedPref.getString("anonymous_uid", null)
 
         if (savedUid != null) {
-            Toast.makeText(this, "Welcome back! Your previous UID: $savedUid", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Welcome!", Toast.LENGTH_SHORT).show()
         }
 
         auth.signInAnonymously().addOnCompleteListener(this) { task ->

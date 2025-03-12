@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager2.widget.ViewPager2
 import com.z0diac.tesapi.R
 import com.z0diac.tesapi.ui.auth.LoginActivity
+import com.z0diac.tesapi.ui.dashboard.DashboardActivity
 
 class OnboardingActivity : AppCompatActivity() {
 
@@ -38,7 +39,7 @@ class OnboardingActivity : AppCompatActivity() {
         setContentView(R.layout.activity_onboarding)
 
         if (isOnboardingCompleted()) {
-            startActivity(Intent(this, LoginActivity::class.java))
+            startActivity(Intent(this, DashboardActivity::class.java))
             finish()
         }
 
