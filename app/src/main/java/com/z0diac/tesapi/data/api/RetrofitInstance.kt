@@ -1,4 +1,4 @@
-package com.z0diac.tesapi
+package com.z0diac.tesapi.data.api
 
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory

@@ -4,8 +4,9 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import com.google.firebase.auth.FirebaseAuth
 import com.z0diac.tesapi.databinding.ActivityDashboardBinding
-import com.z0diac.tesapi.ui.auth.AuthViewModel
+import com.z0diac.tesapi.viewmodel.AuthViewModel
 import com.z0diac.tesapi.ui.auth.LoginActivity
 
 class DashboardActivity : AppCompatActivity() {
@@ -28,6 +29,7 @@ class DashboardActivity : AppCompatActivity() {
 
         binding.btnLogout.setOnClickListener {
             viewModel.logout()
+            FirebaseAuth.getInstance().signOut() // Pastikan Firebase logout
             startActivity(Intent(this, LoginActivity::class.java))
             finish()
         }

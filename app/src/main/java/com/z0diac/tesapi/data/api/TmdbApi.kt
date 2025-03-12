@@ -1,5 +1,6 @@
-package com.z0diac.tesapi
+package com.z0diac.tesapi.data.api
 
+import com.z0diac.tesapi.data.model.MovieResponse
 import retrofit2.Call
 import retrofit2.http.GET
 import retrofit2.http.Query

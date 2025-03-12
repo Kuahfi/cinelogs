@@ -1,10 +1,10 @@
-package com.z0diac.tesapi
+package com.z0diac.tesapi.ui.splash
 
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import androidx.appcompat.app.AppCompatActivity
-import com.z0diac.tesapi.ui.auth.LoginActivity
+import com.z0diac.tesapi.R
 import com.z0diac.tesapi.ui.onboarding.OnboardingActivity
 
 class splashScreen : AppCompatActivity() {

@@ -1,4 +1,4 @@
-package com.z0diac.tesapi.ui.auth
+package com.z0diac.tesapi.viewmodel
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import com.z0diac.tesapi.data.model.User
-import com.z0diac.tesapi.data.repository.AuthRepository
+import com.z0diac.tesapi.data.repository.auth.AuthRepository
 import kotlinx.coroutines.launch
 
 class AuthViewModel : ViewModel() {

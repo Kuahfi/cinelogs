@@ -18,7 +18,7 @@
             android:exported="false" />
         <!-- SplashScreen sebagai entry point utama -->
         <activity
-            android:name=".splashScreen"
+            android:name=".ui.splash.splashScreen"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

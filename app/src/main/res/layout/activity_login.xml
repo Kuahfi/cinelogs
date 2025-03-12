@@ -23,7 +23,7 @@
         <EditText
             android:id="@+id/etEmail"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="48dp"
             android:hint="Email"
             android:inputType="textEmailAddress"
             android:focusable="true"
@@ -32,7 +32,7 @@
         <EditText
             android:id="@+id/etPassword"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="48dp"
             android:hint="Password"
             android:inputType="textPassword"
             android:layout_marginTop="8dp"/>
@@ -42,13 +42,27 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Login"
+            android:backgroundTint="#205781"
             android:layout_marginTop="12dp"/>
+
+        <Button
+            android:id="@+id/btnAnonymousLogin"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Sign in Anonymously"
+            android:textColor="#205781"
+            android:background="@drawable/border_button"
+            android:layout_marginTop="8dp"
+            android:backgroundTint="@android:color/transparent"
+            android:stateListAnimator="@null"/> <!-- Disable default elevation -->
+
 
         <TextView
             android:id="@+id/btnRegister"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Belum punya akun? Daftar di sini"
+            android:layout_gravity="center"
+            android:text="Don't have an account? Sign up here."
             android:textColor="@android:color/holo_blue_dark"
             android:layout_marginTop="12dp"/>
     </LinearLayout>

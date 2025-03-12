@@ -1,5 +1,6 @@
 package com.z0diac.tesapi.ui.onboarding
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
@@ -36,6 +37,11 @@ class OnboardingActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_onboarding)
 
+        if (isOnboardingCompleted()) {
+            startActivity(Intent(this, LoginActivity::class.java))
+            finish()
+        }
+
         viewPager = findViewById(R.id.viewPager)
         btnNext = findViewById(R.id.btnNext)
         btnSkip = findViewById(R.id.btnSkip)
@@ -50,6 +56,9 @@ class OnboardingActivity : AppCompatActivity() {
         setupIndicator()
         setCurrentIndicator(0)
 
+        // Mulai auto-swipe
+        handler.postDelayed(autoSwipeRunnable, 5000)
+
         // Listener untuk mengganti teks & indikator saat geser halaman
         viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
@@ -62,8 +71,13 @@ class OnboardingActivity : AppCompatActivity() {
                 } else {
                     btnNext.text = "Next"
                 }
+
+                // Reset auto-swipe setiap kali user menggeser secara manual
+                handler.removeCallbacks(autoSwipeRunnable)
+                handler.postDelayed(autoSwipeRunnable, 5000)
             }
         })
+
 
         // Tombol Skip -> Langsung ke Login
         btnSkip.setOnClickListener {
@@ -105,6 +119,37 @@ class OnboardingActivity : AppCompatActivity() {
             } else {
                 imageView.setImageResource(R.drawable.indicator_inactive) // Titik non-aktif (putih)
             }
+        }
+    }
+
+    private val handler = android.os.Handler(android.os.Looper.getMainLooper())
+    private val autoSwipeRunnable = object : Runnable {
+        override fun run() {
+            val nextItem = if (viewPager.currentItem < titles.size - 1) {
+                viewPager.currentItem + 1
+            } else {
+                0 // Kembali ke slide pertama jika sudah di terakhir
+            }
+            viewPager.setCurrentItem(nextItem, true)
+            handler.postDelayed(this, 5000) // Jalankan kembali setelah 5 detik
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        handler.removeCallbacks(autoSwipeRunnable)
+    }
+
+    private fun isOnboardingCompleted(): Boolean {
+        val sharedPref = getSharedPreferences("onboarding_prefs", Context.MODE_PRIVATE)
+        return sharedPref.getBoolean("onboarding_completed", false)
+    }
+
+    private fun markOnboardingCompleted() {
+        val sharedPref = getSharedPreferences("onboarding_prefs", Context.MODE_PRIVATE)
+        with(sharedPref.edit()) {
+            putBoolean("onboarding_completed", true)
+            apply()
         }
     }
 }

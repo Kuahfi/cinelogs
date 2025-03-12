@@ -10,10 +10,10 @@ import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.firebase.auth.FirebaseAuth
-import com.z0diac.tesapi.Movie
-import com.z0diac.tesapi.MovieResponse
+import com.z0diac.tesapi.data.model.Movie
+import com.z0diac.tesapi.data.model.MovieResponse
 import com.z0diac.tesapi.R
-import com.z0diac.tesapi.RetrofitInstance
+import com.z0diac.tesapi.data.api.RetrofitInstance
 import com.z0diac.tesapi.ui.dashboard.DashboardActivity
 import retrofit2.Call
 import retrofit2.Callback
@@ -32,6 +32,13 @@ class LoginActivity : AppCompatActivity() {
         setContentView(R.layout.activity_login)
 
         auth = FirebaseAuth.getInstance()
+
+        if (auth.currentUser != null && auth.currentUser!!.isEmailVerified) {
+            startActivity(Intent(this, DashboardActivity::class.java))
+            finish()
+            return
+        }
+
         posterImageView = findViewById(R.id.ivPoster)
 
         val emailField = findViewById<EditText>(R.id.etEmail)
