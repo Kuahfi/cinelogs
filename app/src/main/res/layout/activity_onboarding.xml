@@ -1,0 +1,82 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- ViewPager untuk gambar onboarding -->
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/viewPager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!-- Layer Gradient Overlay -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/gradient_overlay" />
+
+    <!-- Tombol Skip di pojok kanan atas -->
+    <Button
+        android:id="@+id/btnSkip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Skip"
+        android:background="@drawable/bg_skip_button"
+        android:textColor="@android:color/white"
+        android:layout_gravity="top|end"
+        android:layout_marginTop="40dp"
+        android:layout_marginEnd="-10dp"/>
+
+    <!-- Teks Copywriting + Button + Indikator -->
+    <!-- LinearLayout untuk teks dan tombol -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:layout_gravity="bottom"
+        android:padding="24dp"
+        android:layout_marginBottom="40dp"> <!-- Tambahkan margin bawah agar lebih turun -->
+
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Welcome to Cinelogs"
+            android:textAlignment="textStart"
+            android:textSize="42sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/white"/>
+
+        <TextView
+            android:id="@+id/tvDescription"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Your personal space to track, review, and relive your favorite movies."
+            android:textSize="16sp"
+            android:textColor="@android:color/white"
+            android:textAlignment="textStart"
+            android:paddingTop="8dp"/>
+
+        <Button
+            android:id="@+id/btnNext"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Next"
+            android:backgroundTint="@color/white"
+            android:textColor="@color/black"
+            android:layout_marginTop="20dp"/>
+    </LinearLayout>
+
+
+    <!-- Indicator Dots (Dikeluarkan agar menempel di bawah layar) -->
+    <LinearLayout
+        android:id="@+id/indicatorLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_horizontal"
+        android:layout_gravity="bottom"
+        android:layout_marginBottom="40dp"/> <!-- Turunkan ke batas bawah layar -->
+
+
+</FrameLayout>
