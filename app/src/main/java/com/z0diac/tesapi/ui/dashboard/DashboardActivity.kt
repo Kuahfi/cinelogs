@@ -1,36 +1,60 @@
 package com.z0diac.tesapi.ui.dashboard
 
-import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.widget.Toast
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.viewpager2.widget.ViewPager2
 import com.z0diac.tesapi.R
 import com.z0diac.tesapi.data.api.RetrofitInstance
 import com.z0diac.tesapi.data.model.MovieResponse
 import com.z0diac.tesapi.databinding.ActivityDashboardBinding
-import com.z0diac.tesapi.ui.auth.LoginActivity
+import com.z0diac.tesapi.ui.dashboard.ImageSliderAdapter
 import com.z0diac.tesapi.ui.dashboard.adapter.MovieAdapter
-import com.z0diac.tesapi.viewmodel.AuthViewModel
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.util.*
 
 class DashboardActivity : AppCompatActivity() {
     private lateinit var binding: ActivityDashboardBinding
     private lateinit var movieAdapter: MovieAdapter
-    private val viewModel: AuthViewModel by viewModels()  // Inisialisasi ViewModel
+    private lateinit var sliderAdapter: ImageSliderAdapter
+    private val handler = Handler(Looper.getMainLooper())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityDashboardBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        setupImageSlider()
         setupRecyclerView()
         fetchTrendingMovies()
-        setupLogoutButton()
+    }
+
+    private fun setupImageSlider() {
+        val sliderImages = listOf(
+            R.drawable.onboarding1,  // Ganti dengan gambar di drawable
+            R.drawable.onboarding2,
+            R.drawable.onboarding3
+        )
+
+        sliderAdapter = ImageSliderAdapter(sliderImages)
+        binding.viewPagerSlider.adapter = sliderAdapter
+
+        // Auto-slide tiap 3 detik
+        val sliderRunnable = object : Runnable {
+            override fun run() {
+                val nextItem = (binding.viewPagerSlider.currentItem + 1) % sliderImages.size
+                binding.viewPagerSlider.setCurrentItem(nextItem, true)
+                handler.postDelayed(this, 3000)
+            }
+        }
+
+        handler.postDelayed(sliderRunnable, 3000)
     }
 
     private fun setupRecyclerView() {
@@ -60,13 +84,5 @@ class DashboardActivity : AppCompatActivity() {
                 Toast.makeText(this@DashboardActivity, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
             }
         })
-    }
-
-    private fun setupLogoutButton() {
-        binding.btnLogout.setOnClickListener {
-            viewModel.logout()
-            startActivity(Intent(this, LoginActivity::class.java))
-            finish()
-        }
     }
 }

@@ -50,6 +50,14 @@
         android:paddingStart="25dp"
         android:textSize="16sp"/>
 
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/viewPagerSlider"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_marginStart="5dp"
+        android:layout_marginBottom="20dp"
+        android:layout_marginTop="20dp"/>
+
     <!-- Trending Movies Section -->
     <TextView
         android:layout_width="wrap_content"
@@ -58,7 +66,6 @@
         android:textSize="20sp"
         android:textStyle="bold"
         android:paddingStart="5dp"
-        android:paddingTop="16dp"
         android:paddingBottom="8dp"/>
 
     <androidx.recyclerview.widget.RecyclerView
