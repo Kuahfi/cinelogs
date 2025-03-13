@@ -18,12 +18,17 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.util.*
+import androidx.activity.viewModels
+import android.content.Intent
+import com.z0diac.tesapi.viewmodel.AuthViewModel
+import com.z0diac.tesapi.ui.auth.LoginActivity
 
 class DashboardActivity : AppCompatActivity() {
     private lateinit var binding: ActivityDashboardBinding
     private lateinit var movieAdapter: MovieAdapter
     private lateinit var sliderAdapter: ImageSliderAdapter
     private val handler = Handler(Looper.getMainLooper())
+    private val viewModel: AuthViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,13 +38,21 @@ class DashboardActivity : AppCompatActivity() {
         setupImageSlider()
         setupRecyclerView()
         fetchTrendingMovies()
+
+        binding.btnLogout.setOnClickListener {
+            viewModel.logout()
+            startActivity(Intent(this, LoginActivity::class.java))
+            finish()
+        }
     }
 
     private fun setupImageSlider() {
         val sliderImages = listOf(
-            R.drawable.onboarding1,  // Ganti dengan gambar di drawable
-            R.drawable.onboarding2,
-            R.drawable.onboarding3
+            R.drawable.deadpool,  // Ganti dengan gambar di drawable
+            R.drawable.oppenheimer,
+            R.drawable.croods,
+            R.drawable.dune,
+            R.drawable.joker
         )
 
         sliderAdapter = ImageSliderAdapter(sliderImages)

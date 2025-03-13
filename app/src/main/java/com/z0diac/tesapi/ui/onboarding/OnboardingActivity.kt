@@ -38,10 +38,10 @@ class OnboardingActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_onboarding)
 
-//        if (isOnboardingCompleted()) {
-//            startActivity(Intent(this, DashboardActivity::class.java))
-//            finish()
-//        }
+        if (isOnboardingCompleted()) {
+            startActivity(Intent(this, DashboardActivity::class.java))
+            finish()
+        }
 
         viewPager = findViewById(R.id.viewPager)
         btnNext = findViewById(R.id.btnNext)
