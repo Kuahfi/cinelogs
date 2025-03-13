@@ -1,4 +1,4 @@
-package com.z0diac.tesapi.data.repository
+package com.z0diac.tesapi.data.repository.auth
 
 import com.google.firebase.auth.FirebaseAuth
 import com.z0diac.tesapi.data.model.User

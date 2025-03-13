@@ -4,12 +4,12 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:padding="24dp"
-    android:background="@android:color/white">
+        android:background="@drawable/rounded_dialog">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Daftar Akun"
+        android:text="Create Account"
         android:textSize="18sp"
         android:textStyle="bold"
         android:layout_gravity="center_horizontal" />
@@ -18,7 +18,7 @@
         android:id="@+id/etRegisterName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Nama"/>
+        android:hint="Username"/>
 
     <EditText
         android:id="@+id/etRegisterEmail"
@@ -34,10 +34,18 @@
         android:hint="Password"
         android:inputType="textPassword"/>
 
+    <EditText
+        android:id="@+id/etRegisterConfirmPassword"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Confirm Password"
+        android:inputType="textPassword" />
+
     <Button
         android:id="@+id/btnSubmitRegister"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Daftar"
+        android:text="Join"
+        android:backgroundTint="#205781"
         android:layout_marginTop="12dp"/>
 </LinearLayout>

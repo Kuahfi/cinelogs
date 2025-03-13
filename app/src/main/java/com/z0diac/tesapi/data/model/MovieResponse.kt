@@ -1,4 +1,4 @@
-package com.z0diac.tesapi
+package com.z0diac.tesapi.data.model
 
 import com.google.gson.annotations.SerializedName
 

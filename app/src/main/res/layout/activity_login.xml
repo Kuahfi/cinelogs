@@ -23,7 +23,7 @@
         <EditText
             android:id="@+id/etEmail"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="48dp"
             android:hint="Email"
             android:inputType="textEmailAddress"
             android:focusable="true"
@@ -32,7 +32,7 @@
         <EditText
             android:id="@+id/etPassword"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="48dp"
             android:hint="Password"
             android:inputType="textPassword"
             android:layout_marginTop="8dp"/>
@@ -42,14 +42,42 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Login"
+            android:backgroundTint="#205781"
             android:layout_marginTop="12dp"/>
 
-        <TextView
-            android:id="@+id/btnRegister"
-            android:layout_width="wrap_content"
+        <Button
+            android:id="@+id/btnAnonymousLogin"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Belum punya akun? Daftar di sini"
-            android:textColor="@android:color/holo_blue_dark"
-            android:layout_marginTop="12dp"/>
+            android:text="Sign in Anonymously"
+            android:textColor="#205781"
+            android:backgroundTint="#205781"
+            android:background="@drawable/border_button"
+            android:layout_marginTop="8dp"/>
+
+        <!-- Register & Forgot Password Row -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginTop="12dp">
+
+            <TextView
+                android:id="@+id/btnRegister"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Don't have an account? Sign up"
+                android:textColor="@android:color/holo_blue_dark"
+                android:layout_marginEnd="45dp"/>
+
+            <TextView
+                android:id="@+id/btnForgotPassword"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Forgot Password?"
+                android:textColor="@android:color/holo_blue_dark"
+                android:layout_marginStart="8dp"/>
+        </LinearLayout>
     </LinearLayout>
 </LinearLayout>

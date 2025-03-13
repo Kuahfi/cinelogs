@@ -1,5 +1,6 @@
 package com.z0diac.tesapi.ui.onboarding
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
@@ -10,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager2.widget.ViewPager2
 import com.z0diac.tesapi.R
 import com.z0diac.tesapi.ui.auth.LoginActivity
+import com.z0diac.tesapi.ui.dashboard.DashboardActivity
 
 class OnboardingActivity : AppCompatActivity() {
 
@@ -36,6 +38,11 @@ class OnboardingActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_onboarding)
 
+//        if (isOnboardingCompleted()) {
+//            startActivity(Intent(this, DashboardActivity::class.java))
+//            finish()
+//        }
+
         viewPager = findViewById(R.id.viewPager)
         btnNext = findViewById(R.id.btnNext)
         btnSkip = findViewById(R.id.btnSkip)
@@ -43,14 +50,13 @@ class OnboardingActivity : AppCompatActivity() {
         tvDescription = findViewById(R.id.tvDescription)
         indicatorLayout = findViewById(R.id.indicatorLayout)
 
-        // Set adapter untuk ViewPager2
         viewPager.adapter = OnboardingAdapter(this)
 
-        // Setup indikator titik
         setupIndicator()
         setCurrentIndicator(0)
 
-        // Listener untuk mengganti teks & indikator saat geser halaman
+        handler.postDelayed(autoSwipeRunnable, 5000)
+
         viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 tvTitle.text = titles[position]
@@ -62,16 +68,17 @@ class OnboardingActivity : AppCompatActivity() {
                 } else {
                     btnNext.text = "Next"
                 }
+
+                handler.removeCallbacks(autoSwipeRunnable)
+                handler.postDelayed(autoSwipeRunnable, 5000)
             }
         })
 
-        // Tombol Skip -> Langsung ke Login
         btnSkip.setOnClickListener {
             startActivity(Intent(this, LoginActivity::class.java))
             finish()
         }
 
-        // Tombol Next -> Pindah halaman atau ke Login jika di halaman terakhir
         btnNext.setOnClickListener {
             if (viewPager.currentItem < titles.size - 1) {
                 viewPager.currentItem += 1
@@ -105,6 +112,37 @@ class OnboardingActivity : AppCompatActivity() {
             } else {
                 imageView.setImageResource(R.drawable.indicator_inactive) // Titik non-aktif (putih)
             }
+        }
+    }
+
+    private val handler = android.os.Handler(android.os.Looper.getMainLooper())
+    private val autoSwipeRunnable = object : Runnable {
+        override fun run() {
+            val nextItem = if (viewPager.currentItem < titles.size - 1) {
+                viewPager.currentItem + 1
+            } else {
+                0
+            }
+            viewPager.setCurrentItem(nextItem, true)
+            handler.postDelayed(this, 5000)
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        handler.removeCallbacks(autoSwipeRunnable)
+    }
+
+    private fun isOnboardingCompleted(): Boolean {
+        val sharedPref = getSharedPreferences("onboarding_prefs", Context.MODE_PRIVATE)
+        return sharedPref.getBoolean("onboarding_completed", false)
+    }
+
+    private fun markOnboardingCompleted() {
+        val sharedPref = getSharedPreferences("onboarding_prefs", Context.MODE_PRIVATE)
+        with(sharedPref.edit()) {
+            putBoolean("onboarding_completed", true)
+            apply()
         }
     }
 }

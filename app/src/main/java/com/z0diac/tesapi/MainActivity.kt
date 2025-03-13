@@ -4,6 +4,8 @@ import android.os.Bundle
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
+import com.z0diac.tesapi.data.api.RetrofitInstance
+import com.z0diac.tesapi.data.model.MovieResponse
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
