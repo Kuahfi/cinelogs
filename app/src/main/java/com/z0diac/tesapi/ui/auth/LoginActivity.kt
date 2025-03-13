@@ -55,7 +55,7 @@ class LoginActivity : AppCompatActivity() {
             showRegisterDialog()
         }
 
-        forgotPasswordText.setOnClickListener { // 🔥 Tambahkan ini
+        forgotPasswordText.setOnClickListener {
             showResetPasswordDialog()
         }
 
@@ -100,7 +100,6 @@ class LoginActivity : AppCompatActivity() {
                 val user = auth.currentUser
                 val newUid = user?.uid
 
-                // Simpan UID baru
                 sharedPref.edit().putString("anonymous_uid", newUid).apply()
 
                 Toast.makeText(this, "Signed in as Anonymous", Toast.LENGTH_SHORT).show()
@@ -173,7 +172,6 @@ class LoginActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            // 🔥 Cek apakah email terdaftar sebelum reset password
             FirebaseAuth.getInstance().fetchSignInMethodsForEmail(email)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
@@ -181,7 +179,6 @@ class LoginActivity : AppCompatActivity() {
                         if (signInMethods.isNullOrEmpty()) {
                             Toast.makeText(this, "Email is not registered!", Toast.LENGTH_LONG).show()
                         } else {
-                            // 🔹 Email ditemukan, lanjutkan reset password
                             FirebaseAuth.getInstance().sendPasswordResetEmail(email)
                                 .addOnCompleteListener { resetTask ->
                                     if (resetTask.isSuccessful) {
@@ -204,7 +201,7 @@ class LoginActivity : AppCompatActivity() {
 
 
     private fun fetchMovies() {
-        RetrofitInstance.api.getPopularMovies("043cbbcb77cb0cae18791c2111db5c75")
+        RetrofitInstance.api.getPopularMovies("043cbbcb77cb0cae18791c2111db5c75") //bikin taro strings
             .enqueue(object : Callback<MovieResponse> {
                 override fun onResponse(call: Call<MovieResponse>, response: Response<MovieResponse>) {
                     if (response.isSuccessful) {

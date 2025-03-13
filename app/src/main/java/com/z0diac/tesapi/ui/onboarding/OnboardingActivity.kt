@@ -38,10 +38,10 @@ class OnboardingActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_onboarding)
 
-        if (isOnboardingCompleted()) {
-            startActivity(Intent(this, DashboardActivity::class.java))
-            finish()
-        }
+//        if (isOnboardingCompleted()) {
+//            startActivity(Intent(this, DashboardActivity::class.java))
+//            finish()
+//        }
 
         viewPager = findViewById(R.id.viewPager)
         btnNext = findViewById(R.id.btnNext)
@@ -50,17 +50,13 @@ class OnboardingActivity : AppCompatActivity() {
         tvDescription = findViewById(R.id.tvDescription)
         indicatorLayout = findViewById(R.id.indicatorLayout)
 
-        // Set adapter untuk ViewPager2
         viewPager.adapter = OnboardingAdapter(this)
 
-        // Setup indikator titik
         setupIndicator()
         setCurrentIndicator(0)
 
-        // Mulai auto-swipe
         handler.postDelayed(autoSwipeRunnable, 5000)
 
-        // Listener untuk mengganti teks & indikator saat geser halaman
         viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 tvTitle.text = titles[position]
@@ -73,20 +69,16 @@ class OnboardingActivity : AppCompatActivity() {
                     btnNext.text = "Next"
                 }
 
-                // Reset auto-swipe setiap kali user menggeser secara manual
                 handler.removeCallbacks(autoSwipeRunnable)
                 handler.postDelayed(autoSwipeRunnable, 5000)
             }
         })
 
-
-        // Tombol Skip -> Langsung ke Login
         btnSkip.setOnClickListener {
             startActivity(Intent(this, LoginActivity::class.java))
             finish()
         }
 
-        // Tombol Next -> Pindah halaman atau ke Login jika di halaman terakhir
         btnNext.setOnClickListener {
             if (viewPager.currentItem < titles.size - 1) {
                 viewPager.currentItem += 1
@@ -129,10 +121,10 @@ class OnboardingActivity : AppCompatActivity() {
             val nextItem = if (viewPager.currentItem < titles.size - 1) {
                 viewPager.currentItem + 1
             } else {
-                0 // Kembali ke slide pertama jika sudah di terakhir
+                0
             }
             viewPager.setCurrentItem(nextItem, true)
-            handler.postDelayed(this, 5000) // Jalankan kembali setelah 5 detik
+            handler.postDelayed(this, 5000)
         }
     }
 
