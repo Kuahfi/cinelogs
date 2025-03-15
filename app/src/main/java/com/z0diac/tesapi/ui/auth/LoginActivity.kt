@@ -1,5 +1,6 @@
 package com.z0diac.tesapi.ui.auth
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -10,7 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.firebase.auth.FirebaseAuth
-import com.z0diac.tesapi.data.model.Movie
+import com.z0diac.tesapi.data.model.Movie1
 import com.z0diac.tesapi.data.model.MovieResponse
 import com.z0diac.tesapi.R
 import com.z0diac.tesapi.data.api.RetrofitInstance
@@ -25,14 +26,15 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var auth: FirebaseAuth
     private lateinit var posterImageView: ImageView
     private val handler = Handler(Looper.getMainLooper())
-    private var movieList: List<Movie> = emptyList()
+    private var movieList: List<Movie1> = emptyList()
 
+    @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
         auth = FirebaseAuth.getInstance()
 
-        posterImageView = findViewById(R.id.ivPoster)
+        posterImageView = findViewById(R.id.ivLoginPoster)
 
         if (auth.currentUser != null && auth.currentUser!!.isEmailVerified) {
             startActivity(Intent(this, DashboardActivity::class.java))

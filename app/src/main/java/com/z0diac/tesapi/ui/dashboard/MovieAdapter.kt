@@ -1,19 +1,20 @@
-package com.z0diac.tesapi.ui.dashboard.adapter
+package com.z0diac.tesapi.ui.dashboard
 
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.z0diac.tesapi.R
-import com.z0diac.tesapi.data.model.Movie
+import com.z0diac.tesapi.data.model.Movie1
+import com.z0diac.tesapi.ui.dashboard.MovieDetailsActivity
 
-class MovieAdapter(private var movies: List<Movie>) :
+class MovieAdapter(private var movies: List<Movie1>) :
     RecyclerView.Adapter<MovieAdapter.MovieViewHolder>() {
 
-    fun updateMovies(newMovies: List<Movie>) {
+    fun updateMovies(newMovies: List<Movie1>) {
         movies = newMovies
         notifyDataSetChanged()
     }
@@ -30,16 +31,21 @@ class MovieAdapter(private var movies: List<Movie>) :
 
     override fun getItemCount(): Int = movies.size
 
-    class MovieViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val title: TextView = itemView.findViewById(R.id.tvTitle)
+    inner class MovieViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val poster: ImageView = itemView.findViewById(R.id.ivPoster)
 
-        fun bind(movie: Movie) {
-            title.text = movie.title
+        fun bind(movie: Movie1) {
             Glide.with(itemView.context)
                 .load("https://image.tmdb.org/t/p/w500" + movie.posterPath)
                 .placeholder(R.drawable.placeholder_image)
                 .into(poster)
+
+            // Tambahkan OnClickListener untuk pindah ke MovieDetailsActivity
+            itemView.setOnClickListener {
+                val intent = Intent(itemView.context, MovieDetailsActivity::class.java)
+                intent.putExtra("MOVIE_DATA", movie.copy(genres = movie.genres ?: emptyList())) // Kirim data movie
+                itemView.context.startActivity(intent)
+            }
         }
     }
 }

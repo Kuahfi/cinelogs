@@ -12,14 +12,14 @@ import com.z0diac.tesapi.R
 import com.z0diac.tesapi.data.api.RetrofitInstance
 import com.z0diac.tesapi.data.model.MovieResponse
 import com.z0diac.tesapi.databinding.ActivityDashboardBinding
-import com.z0diac.tesapi.ui.dashboard.ImageSliderAdapter
-import com.z0diac.tesapi.ui.dashboard.adapter.MovieAdapter
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.util.*
 import androidx.activity.viewModels
 import android.content.Intent
+import android.widget.ImageView
+import android.widget.LinearLayout
 import com.z0diac.tesapi.viewmodel.AuthViewModel
 import com.z0diac.tesapi.ui.auth.LoginActivity
 
@@ -58,6 +58,8 @@ class DashboardActivity : AppCompatActivity() {
         sliderAdapter = ImageSliderAdapter(sliderImages)
         binding.viewPagerSlider.adapter = sliderAdapter
 
+        setupIndicatorDots(sliderImages.size)
+
         // Auto-slide tiap 3 detik
         val sliderRunnable = object : Runnable {
             override fun run() {
@@ -68,6 +70,12 @@ class DashboardActivity : AppCompatActivity() {
         }
 
         handler.postDelayed(sliderRunnable, 3000)
+
+        binding.viewPagerSlider.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                updateIndicatorDots(position)
+            }
+        })
     }
 
     private fun setupRecyclerView() {
@@ -98,4 +106,32 @@ class DashboardActivity : AppCompatActivity() {
             }
         })
     }
+
+    private fun setupIndicatorDots(size: Int) {
+        val dots = mutableListOf<ImageView>()
+        binding.indicatorLayout.removeAllViews()
+
+        for (i in 0 until size) {
+            val dot = ImageView(this).apply {
+                setImageResource(R.drawable.indicator_inactive) // Dot default
+                val params = LinearLayout.LayoutParams(20, 20).apply {
+                    setMargins(8, 0, 8, 0)
+                }
+                layoutParams = params
+            }
+            dots.add(dot)
+            binding.indicatorLayout.addView(dot)
+        }
+
+        // Aktifkan dot pertama
+        if (dots.isNotEmpty()) dots[0].setImageResource(R.drawable.indicator_active)
+    }
+
+    private fun updateIndicatorDots(position: Int) {
+        for (i in 0 until binding.indicatorLayout.childCount) {
+            val dot = binding.indicatorLayout.getChildAt(i) as ImageView
+            dot.setImageResource(if (i == position) R.drawable.indicator_active else R.drawable.indicator_inactive)
+        }
+    }
+
 }

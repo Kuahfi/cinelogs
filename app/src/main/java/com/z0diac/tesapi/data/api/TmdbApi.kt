@@ -1,8 +1,11 @@
 package com.z0diac.tesapi.data.api
 
 import com.z0diac.tesapi.data.model.MovieResponse
+import com.z0diac.tesapi.data.model.Movie1
+import com.z0diac.tesapi.data.model.VideoResponse
 import retrofit2.Call
 import retrofit2.http.GET
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface TmdbApi {
@@ -10,4 +13,17 @@ interface TmdbApi {
     fun getPopularMovies(
         @Query("api_key") apiKey: String
     ): Call<MovieResponse>
+
+    @GET("movie/{movie_id}")
+    fun getMovieDetails(
+        @Path("movie_id") movieId: Int,
+        @Query("api_key") apiKey: String,
+        @Query("append_to_response") appendToResponse: String = "credits"
+    ): Call<Movie1>
+
+    @GET("movie/{movie_id}/videos")
+    suspend fun getMovieVideos(
+        @Path("movie_id") movieId: Int,
+        @Query("api_key") apiKey: String
+    ): VideoResponse
 }
