@@ -7,6 +7,7 @@ import android.text.TextUtils
 import android.view.View
 import android.widget.Button
 import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
@@ -38,6 +39,9 @@ class MovieDetailsActivity : AppCompatActivity() {
         val tvDirector: TextView = findViewById(R.id.tvDirector)
         val tvSynopsis: TextView = findViewById(R.id.tvSynopsis)
         val btnWatchTrailer: TextView = findViewById(R.id.btnWatchTrailer)
+        val progressBar: ProgressBar = findViewById(R.id.progressBar)
+        val overlayView: View = findViewById(R.id.overlayView)
+
 
         movie?.let {
             tvTitle.text = it.title
@@ -64,6 +68,8 @@ class MovieDetailsActivity : AppCompatActivity() {
 
                     withContext(Dispatchers.Main) {
                         // Ambil hanya tahun dari releaseDate
+                        progressBar.visibility = View.GONE
+                        overlayView.visibility = View.GONE
                         val releaseYear = movieDetails?.releaseDate?.split("-")?.firstOrNull() ?: "N/A"
                         tvReleaseDate.text = " • $releaseYear"
 
@@ -71,7 +77,10 @@ class MovieDetailsActivity : AppCompatActivity() {
                             R.string.genre,
                             movieDetails?.genres?.take(3)?.joinToString { genre -> genre.name } ?: "N/A"
                         )
-                        tvRating.text = getString(R.string.rating, movieDetails?.rating ?: "N/A")
+                        val ratingValue = movieDetails?.rating ?: 0.0
+                        val formattedRating = String.format("%.1f", ratingValue)
+                        tvRating.text = getString(R.string.rating, formattedRating)
+
                         tvRuntime.text = getString(R.string.runtime_placeholder, movieDetails?.runtime ?: 0)
 
                         // Cari sutradara
@@ -108,6 +117,9 @@ class MovieDetailsActivity : AppCompatActivity() {
                         }
                     }
                 } catch (e: Exception) {
+                    withContext(Dispatchers.Main) {
+                        progressBar.visibility = View.GONE
+                    }
                     e.printStackTrace()
                 }
             }

@@ -1,54 +1,74 @@
 package com.z0diac.tesapi.ui.dashboard
 
+import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.view.View
+import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewpager2.widget.ViewPager2
 import com.z0diac.tesapi.R
 import com.z0diac.tesapi.data.api.RetrofitInstance
-import com.z0diac.tesapi.data.model.MovieResponse
+import com.z0diac.tesapi.data.model.Movie1
 import com.z0diac.tesapi.databinding.ActivityDashboardBinding
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
-import java.util.*
-import androidx.activity.viewModels
-import android.content.Intent
-import android.widget.ImageView
-import android.widget.LinearLayout
-import com.z0diac.tesapi.viewmodel.AuthViewModel
 import com.z0diac.tesapi.ui.auth.LoginActivity
+import com.z0diac.tesapi.viewmodel.AuthViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class DashboardActivity : AppCompatActivity() {
     private lateinit var binding: ActivityDashboardBinding
     private lateinit var movieAdapter: MovieAdapter
+    private lateinit var popularMoviesAdapter: MovieAdapter
     private lateinit var sliderAdapter: ImageSliderAdapter
     private val handler = Handler(Looper.getMainLooper())
     private val viewModel: AuthViewModel by viewModels()
+
+    private var displayedMovies = mutableListOf<Movie1>()
+    private var popularMovies = mutableListOf<Movie1>()
+    private var currentPopularPage = 1
+    private var isPopularLoading = false
+
+    private var currentPage = 1  // Halaman pertama
+    private var isLoading = false // Cegah double fetch
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityDashboardBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        currentPage = 1
+        currentPopularPage = 1
+        displayedMovies.clear()
+        popularMovies.clear()
+
         setupImageSlider()
         setupRecyclerView()
-        fetchTrendingMovies()
+        fetchTrendingMovies() // This should now load page 1
+        fetchPopularMovies() // Load first page of popular movies
 
         binding.btnLogout.setOnClickListener {
-            viewModel.logout()
-            startActivity(Intent(this, LoginActivity::class.java))
-            finish()
+            lifecycleScope.launch(Dispatchers.IO) {
+                viewModel.logout()
+                withContext(Dispatchers.Main) {
+                    startActivity(Intent(this@DashboardActivity, LoginActivity::class.java))
+                    finish()
+                }
+            }
         }
     }
 
     private fun setupImageSlider() {
         val sliderImages = listOf(
-            R.drawable.deadpool,  // Ganti dengan gambar di drawable
+            R.drawable.deadpool,
             R.drawable.oppenheimer,
             R.drawable.croods,
             R.drawable.dune,
@@ -60,7 +80,6 @@ class DashboardActivity : AppCompatActivity() {
 
         setupIndicatorDots(sliderImages.size)
 
-        // Auto-slide tiap 3 detik
         val sliderRunnable = object : Runnable {
             override fun run() {
                 val nextItem = (binding.viewPagerSlider.currentItem + 1) % sliderImages.size
@@ -79,32 +98,126 @@ class DashboardActivity : AppCompatActivity() {
     }
 
     private fun setupRecyclerView() {
-        movieAdapter = MovieAdapter(listOf())
+        // Set up trending movies RecyclerView
+        movieAdapter = MovieAdapter(displayedMovies) {
+            fetchTrendingMovies()
+        }
+
         binding.rvTrendingMovies.apply {
             layoutManager = LinearLayoutManager(this@DashboardActivity, LinearLayoutManager.HORIZONTAL, false)
             adapter = movieAdapter
+            setHasFixedSize(true)
+        }
+
+        // Set up popular movies RecyclerView
+        popularMoviesAdapter = MovieAdapter(popularMovies) {
+            fetchPopularMovies()
+        }
+
+        binding.rvPopularMovies.apply {
+            layoutManager = LinearLayoutManager(this@DashboardActivity, LinearLayoutManager.HORIZONTAL, false)
+            adapter = popularMoviesAdapter
+            setHasFixedSize(true)
         }
     }
 
     private fun fetchTrendingMovies() {
+        if (isLoading) return
+        isLoading = true
+        binding.loadingOverlay.visibility = View.VISIBLE
+
         val apiKey = getString(R.string.tmdb_api_key)
 
-        RetrofitInstance.api.getPopularMovies(apiKey).enqueue(object : Callback<MovieResponse> {
-            override fun onResponse(call: Call<MovieResponse>, response: Response<MovieResponse>) {
-                if (response.isSuccessful) {
-                    response.body()?.let { movieResponse ->
-                        movieAdapter.updateMovies(movieResponse.results)
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                val response = RetrofitInstance.api.getTopRatedMovies(apiKey, currentPage).execute()
+
+                withContext(Dispatchers.Main) {
+                    isLoading = false
+                    binding.loadingOverlay.visibility = View.GONE
+
+                    if (response.isSuccessful) {
+                        response.body()?.let { movieResponse ->
+                            val newMovies = movieResponse.results
+                            if (newMovies.isNotEmpty()) {
+                                movieAdapter.updateMovies(newMovies)
+
+                                // Scroll to the first item (position 0) after loading data
+                                // Only do this on the first page
+                                if (currentPage == 1) {
+                                    binding.rvTrendingMovies.scrollToPosition(0)
+                                }
+
+                                currentPage++
+                                Log.d("DashboardActivity", "Loaded page $currentPage with ${newMovies.size} movies")
+                            } else {
+                                Toast.makeText(this@DashboardActivity, "Tidak ada film lagi", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    } else {
+                        Log.e("DashboardActivity", "API error: ${response.code()} - ${response.message()}")
+                        Toast.makeText(this@DashboardActivity, "Gagal memuat film: ${response.message()}", Toast.LENGTH_SHORT).show()
                     }
-                } else {
-                    Toast.makeText(this@DashboardActivity, "Failed to load movies", Toast.LENGTH_SHORT).show()
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    isLoading = false
+                    binding.loadingOverlay.visibility = View.GONE
+                    Log.e("DashboardActivity", "Error fetching movies", e)
+                    Toast.makeText(this@DashboardActivity, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
             }
+        }
+    }
 
-            override fun onFailure(call: Call<MovieResponse>, t: Throwable) {
-                Log.e("DashboardActivity", "Error fetching movies", t)
-                Toast.makeText(this@DashboardActivity, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
+    private fun fetchPopularMovies() {
+        if (isPopularLoading) return
+        isPopularLoading = true
+        binding.loadingOverlay.visibility = View.VISIBLE
+
+        val apiKey = getString(R.string.tmdb_api_key)
+
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                val response = RetrofitInstance.api.getPopularMovies(apiKey, currentPopularPage).execute()
+
+                withContext(Dispatchers.Main) {
+                    isPopularLoading = false
+                    binding.loadingOverlay.visibility = View.GONE
+
+                    if (response.isSuccessful) {
+                        response.body()?.let { movieResponse ->
+                            val newMovies = movieResponse.results
+
+                            if (newMovies.isNotEmpty()) {
+                                popularMoviesAdapter.updateMovies(newMovies)
+
+                                // Scroll to the first item (position 0) after loading data
+                                // Only do this on the first page
+                                if (currentPopularPage == 1) {
+                                    binding.rvPopularMovies.scrollToPosition(0)
+                                }
+
+                                currentPopularPage++
+                                Log.d("DashboardActivity", "Popular Movies Page $currentPopularPage loaded: ${newMovies.size} movies")
+                            } else {
+                                Toast.makeText(this@DashboardActivity, "Tidak ada film populer lagi", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    } else {
+                        Log.e("DashboardActivity", "Popular Movies API error: ${response.code()} - ${response.message()}")
+                        Toast.makeText(this@DashboardActivity, "Gagal memuat film populer: ${response.message()}", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    isPopularLoading = false
+                    binding.loadingOverlay.visibility = View.GONE
+                    Log.e("DashboardActivity", "Error fetching popular movies", e)
+                    Toast.makeText(this@DashboardActivity, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
             }
-        })
+        }
     }
 
     private fun setupIndicatorDots(size: Int) {
@@ -113,7 +226,7 @@ class DashboardActivity : AppCompatActivity() {
 
         for (i in 0 until size) {
             val dot = ImageView(this).apply {
-                setImageResource(R.drawable.indicator_inactive) // Dot default
+                setImageResource(R.drawable.indicator_inactive)
                 val params = LinearLayout.LayoutParams(20, 20).apply {
                     setMargins(8, 0, 8, 0)
                 }
@@ -123,7 +236,6 @@ class DashboardActivity : AppCompatActivity() {
             binding.indicatorLayout.addView(dot)
         }
 
-        // Aktifkan dot pertama
         if (dots.isNotEmpty()) dots[0].setImageResource(R.drawable.indicator_active)
     }
 
@@ -134,4 +246,8 @@ class DashboardActivity : AppCompatActivity() {
         }
     }
 
+    override fun onDestroy() {
+        handler.removeCallbacksAndMessages(null)
+        super.onDestroy()
+    }
 }
