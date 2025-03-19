@@ -24,7 +24,8 @@ data class Movie1(
 
 @Parcelize
 data class Credits(
-    val crew: List<CrewMember> = emptyList()
+    val crew: List<CrewMember> = emptyList(),
+    val cast: List<Cast> = emptyList()
 ) : Parcelable
 
 @Parcelize
@@ -48,3 +49,12 @@ data class Video(
     val site: String,
     val type: String
 )
+
+
+@Parcelize
+data class Cast(
+    val id: Int,
+    val name: String,
+    @SerializedName("character") val character: String,
+    @SerializedName("profile_path") val profilePath: String?
+) : Parcelable

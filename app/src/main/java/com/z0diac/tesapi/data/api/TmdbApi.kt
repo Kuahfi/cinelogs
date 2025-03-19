@@ -1,5 +1,6 @@
 package com.z0diac.tesapi.data.api
 
+import com.z0diac.tesapi.data.model.Credits
 import com.z0diac.tesapi.data.model.MovieResponse
 import com.z0diac.tesapi.data.model.Movie1
 import com.z0diac.tesapi.data.model.VideoResponse
@@ -33,4 +34,11 @@ interface TmdbApi {
         @Path("movie_id") movieId: Int,
         @Query("api_key") apiKey: String
     ): VideoResponse
+
+    @GET("movie/{movie_id}/credits")
+    fun getMovieCredits(
+        @Path("movie_id") movieId: Int,
+        @Query("api_key") apiKey: String
+    ): Call<Credits>
+
 }
