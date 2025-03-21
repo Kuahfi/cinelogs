@@ -5,7 +5,10 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
+import android.widget.Button
+import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.Toast
@@ -14,17 +17,22 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.viewpager2.widget.ViewPager2
+import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.firebase.auth.FirebaseAuth
 import com.z0diac.tesapi.R
 import com.z0diac.tesapi.data.api.RetrofitInstance
 import com.z0diac.tesapi.data.model.Movie1
 import com.z0diac.tesapi.databinding.ActivityDashboardBinding
 import com.z0diac.tesapi.ui.auth.LoginActivity
+import com.z0diac.tesapi.ui.profile.ProfileActivity
 import com.z0diac.tesapi.viewmodel.AuthViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class DashboardActivity : AppCompatActivity() {
+    private lateinit var ivProfile: ImageView
+    private lateinit var auth: FirebaseAuth
     private lateinit var binding: ActivityDashboardBinding
     private lateinit var movieAdapter: MovieAdapter
     private lateinit var popularMoviesAdapter: MovieAdapter
@@ -44,6 +52,29 @@ class DashboardActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityDashboardBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        auth = FirebaseAuth.getInstance()
+        ivProfile = binding.ivProfile
+
+        ivProfile.setOnClickListener {
+            try {
+                val user = auth.currentUser
+                if (user != null) {
+                    if (user.isAnonymous) {
+                        showRegisterDialog()
+                    } else {
+                        val intent = Intent(this, ProfileActivity::class.java)
+                        startActivity(intent)
+                    }
+                } else {
+                    showRegisterDialog()
+                }
+            } catch (e: Exception) {
+                Log.e("DashboardActivity", "Error handling profile click", e)
+                Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+        }
+
 
         currentPage = 1
         currentPopularPage = 1
@@ -245,6 +276,89 @@ class DashboardActivity : AppCompatActivity() {
             dot.setImageResource(if (i == position) R.drawable.indicator_active else R.drawable.indicator_inactive)
         }
     }
+
+    private fun showRegisterDialog() {
+        try {
+            val dialog = BottomSheetDialog(this)
+            val view = LayoutInflater.from(this).inflate(R.layout.register_dialog, null)
+
+            // Find views safely with null checks
+            val etName = view.findViewById<EditText>(R.id.etRegisterName)
+            val etEmail = view.findViewById<EditText>(R.id.etRegisterEmail)
+            val etPassword = view.findViewById<EditText>(R.id.etRegisterPassword)
+            val etConfirmPassword = view.findViewById<EditText>(R.id.etRegisterConfirmPassword)
+            val btnSubmit = view.findViewById<Button>(R.id.btnSubmitRegister)
+
+            // Check if any required view is null
+            if (etEmail == null || etPassword == null || etConfirmPassword == null || btnSubmit == null) {
+                Log.e("DashboardActivity", "One or more views not found in register_dialog.xml")
+                Toast.makeText(this, "Error loading registration form", Toast.LENGTH_SHORT).show()
+                return
+            }
+
+            btnSubmit.setOnClickListener {
+                try {
+                    val email = etEmail.text.toString().trim()
+                    val password = etPassword.text.toString().trim()
+                    val confirmPassword = etConfirmPassword.text.toString().trim()
+
+                    if (email.isEmpty() || password.isEmpty()) {
+                        Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show()
+                        return@setOnClickListener
+                    }
+
+                    if(password != confirmPassword){
+                        Toast.makeText(this, "Passwords do not match!", Toast.LENGTH_SHORT).show()
+                        return@setOnClickListener
+                    }
+
+                    FirebaseAuth.getInstance().createUserWithEmailAndPassword(email, password)
+                        .addOnCompleteListener { task ->
+                            try {
+                                if (task.isSuccessful) {
+                                    val user = FirebaseAuth.getInstance().currentUser
+                                    user?.sendEmailVerification()?.addOnCompleteListener { emailTask ->
+                                        try {
+                                            if (emailTask.isSuccessful) {
+                                                Toast.makeText(this, "Verification email sent! Please login to continue.", Toast.LENGTH_LONG).show()
+                                                dialog.dismiss()
+
+                                                // Sign out the current user
+                                                FirebaseAuth.getInstance().signOut()
+
+                                                // Redirect to LoginActivity
+                                                startActivity(Intent(this@DashboardActivity, LoginActivity::class.java))
+                                                finish() // Close the current activity
+                                            } else {
+                                                Toast.makeText(this, "Failed to send verification email: ${emailTask.exception?.message}", Toast.LENGTH_SHORT).show()
+                                            }
+                                        } catch (e: Exception) {
+                                            Log.e("DashboardActivity", "Error in email verification", e)
+                                            Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                                        }
+                                    }
+                                } else {
+                                    Toast.makeText(this, "Registration Failed: ${task.exception?.message}", Toast.LENGTH_LONG).show()
+                                }
+                            } catch (e: Exception) {
+                                Log.e("DashboardActivity", "Error in registration completion", e)
+                                Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                } catch (e: Exception) {
+                    Log.e("DashboardActivity", "Error in registration button click", e)
+                    Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            dialog.setContentView(view)
+            dialog.show()
+        } catch (e: Exception) {
+            Log.e("DashboardActivity", "Error showing register dialog", e)
+            Toast.makeText(this, "Error showing registration dialog: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
+    }
+
 
     override fun onDestroy() {
         handler.removeCallbacksAndMessages(null)
