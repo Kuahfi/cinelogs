@@ -59,6 +59,7 @@ dependencies {
     annotationProcessor ("com.github.bumptech.glide:compiler:4.12.0")
     implementation ("androidx.recyclerview:recyclerview:1.3.1")
     implementation ("com.squareup.picasso:picasso:2.8")
+    implementation ("jp.wasabeef:glide-transformations:4.3.0")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)

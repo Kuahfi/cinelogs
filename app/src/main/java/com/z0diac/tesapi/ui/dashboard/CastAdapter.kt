@@ -13,7 +13,7 @@ import com.z0diac.tesapi.data.model.Cast
 class CastAdapter(private val castList: List<Cast>) : RecyclerView.Adapter<CastAdapter.CastViewHolder>() {
 
     class CastViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val ivActorImage: ImageView = itemView.findViewById(R.id.ivActorImage)
+        val ivActorImage: ImageView = itemView.findViewById(R.id.ivCastPhoto)
         val tvActorName: TextView = itemView.findViewById(R.id.tvActorName)
         val tvCharacterName: TextView = itemView.findViewById(R.id.tvCharacterName)
     }
