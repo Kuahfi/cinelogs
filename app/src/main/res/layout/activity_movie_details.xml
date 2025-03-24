@@ -6,6 +6,19 @@
     android:layout_height="match_parent"
     android:fitsSystemWindows="true">
 
+    <ImageButton
+        android:id="@+id/btnBack"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_margin="16dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:padding="8dp"
+        android:scaleType="centerInside"
+        android:src="@drawable/back_arrow"
+        android:contentDescription="Back"
+        android:elevation="8dp"
+        android:layout_gravity="top|start"/>
+
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
@@ -19,18 +32,6 @@
             android:fitsSystemWindows="true"
             app:contentScrim="?attr/colorPrimary"
             app:layout_scrollFlags="scroll|exitUntilCollapsed">
-
-            <ImageButton
-                android:id="@+id/btnBack"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_margin="16dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:padding="8dp"
-                android:scaleType="centerInside"
-                android:src="@drawable/back_arrow"
-                android:contentDescription="Back"
-                app:layout_collapseMode="pin"/>
 
             <!-- Movie Poster Image -->
             <ImageView
@@ -60,9 +61,10 @@
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
         android:contentDescription="Play Trailer"
-        android:visibility="gone"
+        android:visibility="visible"
         app:layout_anchor="@id/appBarLayout"
-        app:layout_anchorGravity="bottom|end"/>
+        app:layout_anchorGravity="bottom|end"
+        android:src="@drawable/ic_tv"/>
 
     <!-- Loading Indicator (centered in the screen) -->
     <FrameLayout
@@ -108,10 +110,9 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="16dp"
-                android:layout_marginEnd="16dp"
+                android:layout_marginEnd="60dp"
                 android:textSize="24sp"
                 android:textStyle="bold"
-                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 tools:text="Movie Title" />
@@ -137,6 +138,18 @@
                 app:layout_constraintTop_toTopOf="@id/tvReleaseYear"
                 tools:text="120 min" />
 
+            <!-- Director Section -->
+            <TextView
+                android:id="@+id/tvDirector"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="10dp"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tvDuration" />
+
             <!-- Rating Section -->
             <RatingBar
                 android:id="@+id/ratingBar"
@@ -149,7 +162,7 @@
                 android:numStars="5"
                 android:stepSize="0.5"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/tvReleaseYear" />
+                app:layout_constraintTop_toBottomOf="@id/tvDirector" />
 
             <TextView
                 android:id="@+id/tvRating"

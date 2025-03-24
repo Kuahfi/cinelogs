@@ -9,6 +9,7 @@ import android.view.View
 import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.ImageView
+import android.widget.RatingBar
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.NestedScrollView
@@ -52,7 +53,7 @@ class MovieDetailsActivity : AppCompatActivity() {
         // Inside onCreate()
         val btnBack: ImageButton = findViewById(R.id.btnBack)
         btnBack.setOnClickListener {
-            onBackPressed()
+            finish()
         }
 
 
@@ -122,7 +123,6 @@ class MovieDetailsActivity : AppCompatActivity() {
                 // Get cast information
                 val creditsResponse = RetrofitInstance.api.getMovieCredits(movie.id, apiKey).execute()
                 val credits = creditsResponse.body()
-                val castList = credits?.cast?.take(10) ?: emptyList()
 
                 // Update UI on main thread
                 withContext(Dispatchers.Main) {
@@ -136,8 +136,17 @@ class MovieDetailsActivity : AppCompatActivity() {
                     val ratingValue = movieDetails?.rating ?: 0.0f
                     val formattedRating = String.format("%.1f", ratingValue)
                     tvRating.text = getString(R.string.rating, formattedRating)
+                    // Set rating bar
+                    val ratingBar: RatingBar = findViewById(R.id.ratingBar)
+                    ratingBar.rating = ratingValue / 2  // Karena TMDB biasanya skala 10, sedangkan RatingBar skala 5
+
+                    val castList = credits?.cast?.take(10) ?: emptyList()
 
                     tvRuntime.text = getString(R.string.runtime_placeholder, movieDetails?.runtime ?: 0)
+
+                    val tvDirector: TextView = findViewById(R.id.tvDirector)
+                    val director = movieDetails?.credits?.crew?.find { it.job == "Director" }?.name ?: "N/A"
+                    tvDirector.text = getString(R.string.director_placeholder, director)
 
                     // Synopsis with expand/collapse
                     var isExpanded = false
