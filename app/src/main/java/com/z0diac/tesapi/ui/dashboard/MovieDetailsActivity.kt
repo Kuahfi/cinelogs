@@ -11,7 +11,9 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.RatingBar
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.widget.NestedScrollView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -21,10 +23,13 @@ import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.RequestOptions
 import com.bumptech.glide.request.target.Target
+import com.google.android.material.button.MaterialButton
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.z0diac.tesapi.R
 import com.z0diac.tesapi.data.api.RetrofitInstance
 import com.z0diac.tesapi.data.model.Movie1
+import com.z0diac.tesapi.data.model.UserMovieList
+import com.z0diac.tesapi.data.repository.user.UserRepository
 import jp.wasabeef.glide.transformations.BlurTransformation
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -36,16 +41,31 @@ class MovieDetailsActivity : AppCompatActivity() {
     private lateinit var loadingContainer: FrameLayout
     private lateinit var contentScrollView: NestedScrollView
     private lateinit var blurOverlay: View
+    private lateinit var btnFavorite: MaterialButton
+    private lateinit var btnWatchlist: MaterialButton
+    private lateinit var userRepository: UserRepository
+    private var isInFavorites = false
+    private var isInWatchlist = false
+    private var currentUserId: String? = null
+    private lateinit var currentMovie: Movie1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_movie_details)
         apiKey = getString(R.string.tmdb_api_key)
 
+        // Initialize user repository
+        userRepository = UserRepository()
+        currentUserId = userRepository.getCurrentUserId()
+
         // Initialize loading views
         loadingContainer = findViewById(R.id.loadingContainer)
         contentScrollView = findViewById(R.id.contentScrollView)
         blurOverlay = findViewById(R.id.blurOverlay)
+
+        // Initialize buttons with the correct type - MaterialButton instead of ImageButton
+        btnFavorite = findViewById(R.id.btnFavorite)
+        btnWatchlist = findViewById(R.id.btnWatchlist)
 
         // Show loading state
         showLoadingState(true)
@@ -56,23 +76,24 @@ class MovieDetailsActivity : AppCompatActivity() {
             finish()
         }
 
-
         val movie = intent.getParcelableExtra<Movie1>("MOVIE_DATA")
-        val ivBackdrop: ImageView = findViewById(R.id.ivMoviePoster)
-        val tvTitle: TextView = findViewById(R.id.tvMovieTitle)
-        val tvFormattedReleaseDate: TextView = findViewById(R.id.tvReleaseYear)
-        val tvRating: TextView = findViewById(R.id.tvRating)
-        val tvRuntime: TextView = findViewById(R.id.tvDuration)
-        val tvSynopsis: TextView = findViewById(R.id.tvOverview)
-        val btnWatchTrailer: FloatingActionButton = findViewById(R.id.fabPlayTrailer)
-        val rvCast: RecyclerView = findViewById(R.id.rvCast)
+        if (movie != null) {
+            currentMovie = movie
 
-        // Setup RecyclerView with horizontal orientation for cast
-        rvCast.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+            val ivBackdrop: ImageView = findViewById(R.id.ivMoviePoster)
+            val tvTitle: TextView = findViewById(R.id.tvMovieTitle)
+            val tvFormattedReleaseDate: TextView = findViewById(R.id.tvReleaseYear)
+            val tvRating: TextView = findViewById(R.id.tvRating)
+            val tvRuntime: TextView = findViewById(R.id.tvDuration)
+            val tvSynopsis: TextView = findViewById(R.id.tvOverview)
+            val btnWatchTrailer: FloatingActionButton = findViewById(R.id.fabPlayTrailer)
+            val rvCast: RecyclerView = findViewById(R.id.rvCast)
 
-        movie?.let {
+            // Setup RecyclerView with horizontal orientation for cast
+            rvCast.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+
             // Set movie title immediately (even during loading)
-            tvTitle.text = it.title
+            tvTitle.text = movie.title
 
             // Load blurred backdrop image first
             loadBlurredBackdrop(movie, ivBackdrop)
@@ -80,7 +101,143 @@ class MovieDetailsActivity : AppCompatActivity() {
             // Fetch movie details
             fetchMovieDetails(movie, ivBackdrop, tvFormattedReleaseDate, tvRating,
                 tvRuntime, tvSynopsis, btnWatchTrailer, rvCast)
+
+            // Set up favorite and watchlist buttons
+            setupFavoriteAndWatchlistButtons(movie)
         }
+    }
+
+    private fun setupFavoriteAndWatchlistButtons(movie: Movie1) {
+        // Initialize buttons with default states
+        updateFavoriteButtonUI(false)
+        updateWatchlistButtonUI(false)
+
+        // Check if user is logged in
+        currentUserId?.let { userId ->
+            // Fetch current states
+            CoroutineScope(Dispatchers.IO).launch {
+                try {
+                    isInFavorites = userRepository.isInFavorites(userId, movie.id)
+                    isInWatchlist = userRepository.isInWatchlist(userId, movie.id)
+
+                    withContext(Dispatchers.Main) {
+                        updateFavoriteButtonUI(isInFavorites)
+                        updateWatchlistButtonUI(isInWatchlist)
+
+                        // Set up button click listeners
+                        setupFavoriteButton(movie, userId)
+                        setupWatchlistButton(movie, userId)
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+        } ?: run {
+            // User not logged in - set up buttons to prompt login
+            btnFavorite.setOnClickListener {
+                Toast.makeText(this, "Please log in to add to favorites", Toast.LENGTH_SHORT).show()
+                // Could add navigation to login screen here
+            }
+
+            btnWatchlist.setOnClickListener {
+                Toast.makeText(this, "Please log in to add to watchlist", Toast.LENGTH_SHORT).show()
+                // Could add navigation to login screen here
+            }
+        }
+    }
+
+    private fun setupFavoriteButton(movie: Movie1, userId: String) {
+        btnFavorite.setOnClickListener {
+            CoroutineScope(Dispatchers.IO).launch {
+                try {
+                    if (isInFavorites) {
+                        // Remove from favorites
+                        userRepository.removeFromFavorites(userId, movie.id)
+                        isInFavorites = false
+                    } else {
+                        // Add to favorites
+                        val userMovie = UserMovieList(
+                            movieId = movie.id,
+                            posterPath = movie.backdropPath,
+                            title = movie.title
+                        )
+                        userRepository.addToFavorites(userId, userMovie)
+                        isInFavorites = true
+                    }
+
+                    withContext(Dispatchers.Main) {
+                        updateFavoriteButtonUI(isInFavorites)
+                        val message = if (isInFavorites) "Added to favorites" else "Removed from favorites"
+                        Toast.makeText(this@MovieDetailsActivity, message, Toast.LENGTH_SHORT).show()
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(
+                            this@MovieDetailsActivity,
+                            "Error updating favorites",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+            }
+        }
+    }
+
+    private fun setupWatchlistButton(movie: Movie1, userId: String) {
+        btnWatchlist.setOnClickListener {
+            CoroutineScope(Dispatchers.IO).launch {
+                try {
+                    if (isInWatchlist) {
+                        // Remove from watchlist
+                        userRepository.removeFromWatchlist(userId, movie.id)
+                        isInWatchlist = false
+                    } else {
+                        // Add to watchlist
+                        val userMovie = UserMovieList(
+                            movieId = movie.id,
+                            posterPath = movie.backdropPath,
+                            title = movie.title
+                        )
+                        userRepository.addToWatchlist(userId, userMovie)
+                        isInWatchlist = true
+                    }
+
+                    withContext(Dispatchers.Main) {
+                        updateWatchlistButtonUI(isInWatchlist)
+                        val message = if (isInWatchlist) "Added to watchlist" else "Removed from watchlist"
+                        Toast.makeText(this@MovieDetailsActivity, message, Toast.LENGTH_SHORT).show()
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(
+                            this@MovieDetailsActivity,
+                            "Error updating watchlist",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+            }
+        }
+    }
+
+    private fun updateFavoriteButtonUI(isFavorite: Boolean) {
+        // Update icon for MaterialButton
+        val iconRes = if (isFavorite) R.drawable.indicator_active else R.drawable.indicator_inactive
+        btnFavorite.setIconResource(iconRes)
+
+        // Optionally update button text
+        btnFavorite.text = if (isFavorite) "In\nFavorites" else "Add to Favorites"
+    }
+
+    private fun updateWatchlistButtonUI(isInWatchlist: Boolean) {
+        // Update icon for MaterialButton
+        val iconRes = if (isInWatchlist) R.drawable.indicator_active else R.drawable.indicator_inactive
+        btnWatchlist.setIconResource(iconRes)
+
+        // Optionally update button text
+        btnWatchlist.text = if (isInWatchlist) "In\nWatchlist" else "Add to Watchlist"
     }
 
     private fun loadBlurredBackdrop(movie: Movie1, ivBackdrop: ImageView) {

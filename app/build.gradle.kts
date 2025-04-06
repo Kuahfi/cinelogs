@@ -60,6 +60,7 @@ dependencies {
     implementation ("androidx.recyclerview:recyclerview:1.3.1")
     implementation ("com.squareup.picasso:picasso:2.8")
     implementation ("jp.wasabeef:glide-transformations:4.3.0")
+    implementation ("com.google.firebase:firebase-firestore-ktx")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
