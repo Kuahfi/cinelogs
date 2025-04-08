@@ -120,13 +120,6 @@
                 android:paddingEnd="8dp"
                 android:overScrollMode="never"
                 android:nestedScrollingEnabled="false"/>
-
-            <Button
-                android:id="@+id/btnLogout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Logout"
-                android:layout_marginTop="12dp"/>
         </LinearLayout>
 
         <!-- ✅ Overlay Blur & Loading Spinner -->

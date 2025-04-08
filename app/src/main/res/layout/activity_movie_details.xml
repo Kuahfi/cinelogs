@@ -285,18 +285,19 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="@id/reviewsLabel" />
 
+            <!-- In your layout XML -->
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvReviews"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:minHeight="100dp"
                 android:layout_marginTop="8dp"
                 android:nestedScrollingEnabled="false"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/reviewsLabel"
-                tools:itemCount="2"
-                tools:listitem="@layout/item_review" />
+                tools:listitem="@layout/item_review"/>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.core.widget.NestedScrollView>

@@ -161,30 +161,4 @@ class UserRepository {
             .await()
         return snapshot.toObjects(Review::class.java)
     }
-
-    suspend fun likeReview(reviewId: String, movieId: Int) {
-        // Find the review in the movie's reviews collection
-        val reviewRef = db.collection("movies")
-            .document(movieId.toString())
-            .collection("reviews")
-            .document(reviewId)
-
-        // Update the likes count
-        db.runTransaction { transaction ->
-            val snapshot = transaction.get(reviewRef)
-            val currentLikes = snapshot.getLong("likes") ?: 0
-            transaction.update(reviewRef, "likes", currentLikes + 1)
-        }.await()
-
-        // Also update in user's reviews
-        val review = reviewRef.get().await().toObject(Review::class.java)
-        if (review != null) {
-            usersCollection
-                .document(review.userId)
-                .collection("reviews")
-                .document(reviewId)
-                .update("likes", review.likes + 1)
-                .await()
-        }
-    }
 }

@@ -85,16 +85,6 @@ class DashboardActivity : AppCompatActivity() {
         setupRecyclerView()
         fetchTrendingMovies() // This should now load page 1
         fetchPopularMovies() // Load first page of popular movies
-
-        binding.btnLogout.setOnClickListener {
-            lifecycleScope.launch(Dispatchers.IO) {
-                viewModel.logout()
-                withContext(Dispatchers.Main) {
-                    startActivity(Intent(this@DashboardActivity, LoginActivity::class.java))
-                    finish()
-                }
-            }
-        }
     }
 
     private fun setupImageSlider() {
