@@ -7,7 +7,6 @@ import android.os.Bundle
 import android.text.TextUtils
 import android.util.Log
 import android.view.View
-import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.ImageButton
@@ -17,7 +16,6 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.core.widget.NestedScrollView
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -40,6 +38,8 @@ import com.z0diac.tesapi.data.model.Review
 import com.z0diac.tesapi.data.model.User
 import com.z0diac.tesapi.data.model.UserMovieList
 import com.z0diac.tesapi.data.repository.user.UserRepository
+import com.z0diac.tesapi.ui.adapters.CastAdapter
+import com.z0diac.tesapi.ui.adapters.ReviewAdapter
 import jp.wasabeef.glide.transformations.BlurTransformation
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -123,7 +123,7 @@ class MovieDetailsActivity : AppCompatActivity() {
         }
 
         rvReviews = findViewById(R.id.rvReviews)
-        reviewAdapter = ReviewAdapter(emptyList())
+        reviewAdapter = ReviewAdapter(emptyList(), isProfileView = false)
         rvReviews.layoutManager = LinearLayoutManager(this)
         rvReviews.adapter = reviewAdapter
 
@@ -520,7 +520,8 @@ class MovieDetailsActivity : AppCompatActivity() {
                         movieTitle = currentMovie.title,
                         rating = rating,
                         reviewText = reviewText,
-                        timestamp = System.currentTimeMillis()
+                        timestamp = System.currentTimeMillis(),
+                        posterPath = currentMovie.posterPath
                     )
 
                     val reviewId = userRepo.addReview(review)

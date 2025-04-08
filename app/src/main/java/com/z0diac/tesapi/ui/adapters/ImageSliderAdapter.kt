@@ -1,4 +1,4 @@
-package com.z0diac.tesapi.ui.dashboard
+package com.z0diac.tesapi.ui.adapters
 
 import android.view.LayoutInflater
 import android.view.View

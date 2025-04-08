@@ -23,6 +23,8 @@ import com.z0diac.tesapi.R
 import com.z0diac.tesapi.data.api.RetrofitInstance
 import com.z0diac.tesapi.data.model.Movie1
 import com.z0diac.tesapi.databinding.ActivityDashboardBinding
+import com.z0diac.tesapi.ui.adapters.ImageSliderAdapter
+import com.z0diac.tesapi.ui.adapters.MovieAdapter
 import com.z0diac.tesapi.ui.auth.LoginActivity
 import com.z0diac.tesapi.ui.profile.ProfileActivity
 import com.z0diac.tesapi.viewmodel.AuthViewModel

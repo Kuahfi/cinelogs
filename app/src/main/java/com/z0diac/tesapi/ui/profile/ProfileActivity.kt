@@ -5,59 +5,72 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
+import androidx.lifecycle.lifecycleScope
+import androidx.viewpager2.widget.ViewPager2
+import com.google.android.material.tabs.TabLayout
+import com.google.android.material.tabs.TabLayoutMediator
 import com.google.firebase.auth.FirebaseAuth
 import com.z0diac.tesapi.R
-import com.z0diac.tesapi.ui.auth.LoginActivity
-import androidx.lifecycle.lifecycleScope
-import com.z0diac.tesapi.data.repository.user.UserRepository
 import com.z0diac.tesapi.data.repository.user.ReviewRepository
+import com.z0diac.tesapi.data.repository.user.UserRepository
+import com.z0diac.tesapi.ui.adapters.ProfileViewPagerAdapter
+import com.z0diac.tesapi.ui.auth.LoginActivity
 import kotlinx.coroutines.launch
 
 class ProfileActivity : AppCompatActivity() {
 
     private lateinit var auth: FirebaseAuth
     private lateinit var tvEmail: TextView
-    private lateinit var btnLogout: Button
     private lateinit var tvUsername: TextView
+    private lateinit var tvReviewsCount: TextView
+    private lateinit var tvWatchlistCount: TextView
+    private lateinit var tvFavoritesCount: TextView
+    private lateinit var btnLogout: Button
+    private lateinit var viewPager: ViewPager2
+    private lateinit var tabLayout: TabLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_profile)
 
         auth = FirebaseAuth.getInstance()
+
+        // Init Views
         tvEmail = findViewById(R.id.tvEmail)
         tvUsername = findViewById(R.id.tvUsername)
+        tvReviewsCount = findViewById(R.id.tvReviewsCount)
+        tvWatchlistCount = findViewById(R.id.tvWatchlistCount)
+        tvFavoritesCount = findViewById(R.id.tvFavoritesCount)
         btnLogout = findViewById(R.id.btnLogout)
+        viewPager = findViewById(R.id.viewPager)
+        tabLayout = findViewById(R.id.tabLayout)
 
-        val tvReviewsCount: TextView = findViewById(R.id.tvReviewsCount)
-        val tvWatchlistCount: TextView = findViewById(R.id.tvWatchlistCount)
-        val tvFavoritesCount: TextView = findViewById(R.id.tvFavoritesCount)
+        val toolbar: Toolbar = findViewById(R.id.toolbar)
+        setSupportActionBar(toolbar)
 
         val user = auth.currentUser
         tvEmail.text = user?.email ?: "No email (Anonymous)"
 
-        val userRepository = UserRepository()
-        val reviewRepository = ReviewRepository()
-
         user?.uid?.let { uid ->
+            setupViewPager(uid)
+
             lifecycleScope.launch {
                 try {
-                    // Fetch username
+                    val userRepository = UserRepository()
+                    val reviewRepository = ReviewRepository()
+
                     val userData = userRepository.getUser(uid)
                     tvUsername.text = userData?.username ?: "No username"
 
-                    // Fetch reviews count
                     val reviews = reviewRepository.getUserReviews(uid)
                     tvReviewsCount.text = reviews.size.toString()
 
-                    // Fetch watchlist count
                     val watchlist = userRepository.getWatchlist(uid)
                     tvWatchlistCount.text = watchlist.size.toString()
 
-                    // Fetch favorites count
                     val favorites = userRepository.getFavorites(uid)
                     tvFavoritesCount.text = favorites.size.toString()
-
                 } catch (e: Exception) {
                     tvUsername.text = "Error loading data"
                     tvReviewsCount.text = "-"
@@ -69,12 +82,23 @@ class ProfileActivity : AppCompatActivity() {
 
         btnLogout.setOnClickListener {
             auth.signOut()
-            val intent = Intent(this, LoginActivity::class.java)
-            startActivity(intent)
+            startActivity(Intent(this, LoginActivity::class.java))
             finish()
         }
+
     }
 
+    private fun setupViewPager(userId: String) {
+        val adapter = ProfileViewPagerAdapter(this, userId)
+        viewPager.adapter = adapter
 
-
+        TabLayoutMediator(tabLayout, viewPager) { tab, position ->
+            tab.text = when (position) {
+                0 -> "Reviews"
+                1 -> "Watchlist"
+                2 -> "Favorites"
+                else -> ""
+            }
+        }.attach()
+    }
 }
