@@ -7,40 +7,7 @@ import kotlinx.coroutines.tasks.await
 class ReviewRepository {
     private val db = FirebaseFirestore.getInstance()
     private val usersCollection = db.collection("users")
-    private val moviesCollection = db.collection("movies")
 
-    // Tambah review ke user & movie collection
-    suspend fun addReview(review: Review, movieId: Int) {
-        val timestamp = review.timestamp.toString()
-
-        // Simpan di collection user
-        usersCollection
-            .document(review.userId)
-            .collection("reviews")
-            .document(timestamp)
-            .set(review)
-            .await()
-
-        // Simpan di collection film
-        moviesCollection
-            .document(movieId.toString())
-            .collection("reviews")
-            .document(timestamp)
-            .set(review)
-            .await()
-    }
-
-    // Ambil semua review berdasarkan movie
-    suspend fun getMovieReviews(movieId: Int): List<Review> {
-        val snapshot = moviesCollection
-            .document(movieId.toString())
-            .collection("reviews")
-            .get()
-            .await()
-        return snapshot.toObjects(Review::class.java)
-    }
-
-    // Ambil semua review milik user
     suspend fun getUserReviews(userId: String): List<Review> {
         val snapshot = usersCollection
             .document(userId)
@@ -50,13 +17,24 @@ class ReviewRepository {
         return snapshot.toObjects(Review::class.java)
     }
 
-    suspend fun getUserReviewCount(userId: String): Int {
-        val snapshot = usersCollection
+    suspend fun updateReview(userId: String, review: Review) {
+        usersCollection
             .document(userId)
             .collection("reviews")
-            .get()
+            .document(review.id)
+            .set(review)
             .await()
-        return snapshot.size()
     }
+
+    suspend fun deleteReview(userId: String, reviewId: String) {
+        usersCollection
+            .document(userId)
+            .collection("reviews")
+            .document(reviewId)
+            .delete()
+            .await()
+    }
+
+
 
 }

@@ -143,22 +143,4 @@ class UserRepository {
 
         return reviewId
     }
-
-    suspend fun getUserReviews(userId: String): List<Review> {
-        val snapshot = usersCollection
-            .document(userId)
-            .collection("reviews")
-            .get()
-            .await()
-        return snapshot.toObjects(Review::class.java)
-    }
-
-    suspend fun getMovieReviews(movieId: Int): List<Review> {
-        val snapshot = db.collection("movies")
-            .document(movieId.toString())
-            .collection("reviews")
-            .get()
-            .await()
-        return snapshot.toObjects(Review::class.java)
-    }
 }

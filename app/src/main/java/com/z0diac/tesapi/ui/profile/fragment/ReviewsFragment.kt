@@ -11,7 +11,9 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.z0diac.tesapi.R
+import com.z0diac.tesapi.data.model.Review
 import com.z0diac.tesapi.data.repository.user.ReviewRepository
+import com.z0diac.tesapi.ui.adapters.OnReviewOptionClickListener
 import com.z0diac.tesapi.ui.adapters.ReviewAdapter
 import kotlinx.coroutines.launch
 
@@ -20,6 +22,8 @@ class ReviewsFragment : Fragment() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var emptyView: TextView
     private lateinit var reviewsAdapter: ReviewAdapter
+
+    private var userId: String? = null // ✅ User ID disimpan sebagai property class
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -32,18 +36,31 @@ class ReviewsFragment : Fragment() {
         recyclerView = view.findViewById(R.id.recyclerViewReviews)
         emptyView = view.findViewById(R.id.tvEmptyReviews)
 
-        // Set up RecyclerView
         recyclerView.layoutManager = LinearLayoutManager(context)
-        reviewsAdapter = ReviewAdapter(emptyList(), isProfileView = true)
+
+        reviewsAdapter = ReviewAdapter(
+            emptyList(),
+            isProfileView = true,
+            optionClickListener = object : OnReviewOptionClickListener {
+                override fun onEditClicked(review: Review) {
+                    showEditDialog(review)
+                }
+
+                override fun onDeleteClicked(review: Review) {
+                    deleteReview(review)
+                }
+            }
+        )
+
         recyclerView.adapter = reviewsAdapter
 
+        userId = arguments?.getString("USER_ID") // ✅ Ambil userId dari arguments
         loadUserReviews()
 
         return view
     }
 
     private fun loadUserReviews() {
-        val userId = arguments?.getString("USER_ID")
         Log.d("ReviewsFragment", "Loading reviews for user: $userId")
 
         if (userId == null) {
@@ -56,18 +73,15 @@ class ReviewsFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                Log.d("ReviewsFragment", "Fetching reviews from repository")
                 val reviewRepository = ReviewRepository()
-                val reviews = reviewRepository.getUserReviews(userId)
+                val reviews = reviewRepository.getUserReviews(userId!!)
                 Log.d("ReviewsFragment", "Fetched ${reviews.size} reviews")
 
                 activity?.runOnUiThread {
                     if (reviews.isEmpty()) {
-                        Log.d("ReviewsFragment", "No reviews found")
                         recyclerView.visibility = View.GONE
                         emptyView.visibility = View.VISIBLE
                     } else {
-                        Log.d("ReviewsFragment", "Displaying ${reviews.size} reviews")
                         recyclerView.visibility = View.VISIBLE
                         emptyView.visibility = View.GONE
                         reviewsAdapter.updateReviews(reviews)
@@ -81,6 +95,69 @@ class ReviewsFragment : Fragment() {
                     emptyView.text = "Error loading reviews: ${e.message}"
                 }
             }
+        }
+    }
+
+    private fun showEditDialog(review: Review) {
+        val dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_edit_review, null)
+        val ratingBar = dialogView.findViewById<android.widget.RatingBar>(R.id.ratingBar)
+        val reviewText = dialogView.findViewById<android.widget.EditText>(R.id.etReviewText)
+
+        ratingBar.rating = review.rating
+        reviewText.setText(review.reviewText)
+
+        val dialog = androidx.appcompat.app.AlertDialog.Builder(requireContext())
+            .setTitle("Edit Review")
+            .setView(dialogView)
+            .setPositiveButton("Update") { _, _ ->
+                val updatedRating = ratingBar.rating
+                val updatedText = reviewText.text.toString()
+                updateReview(review, updatedRating, updatedText)
+            }
+            .setNegativeButton("Cancel", null)
+            .create()
+
+        dialog.show()
+    }
+
+    private fun updateReview(review: Review, newRating: Float, newText: String) {
+        val updatedReview = review.copy(
+            rating = newRating,
+            reviewText = newText,
+            timestamp = System.currentTimeMillis()
+        )
+
+        userId?.let { uid ->
+            viewLifecycleOwner.lifecycleScope.launch {
+                try {
+                    val reviewRepository = ReviewRepository()
+                    reviewRepository.updateReview(uid, updatedReview)
+                    loadUserReviews()
+                } catch (e: Exception) {
+                    Log.e("ReviewsFragment", "Failed to update review", e)
+                }
+            }
+        }
+    }
+
+    private fun deleteReview(review: Review) {
+        userId?.let { uid ->
+            androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                .setTitle("Delete Review")
+                .setMessage("Are you sure you want to delete this review?")
+                .setPositiveButton("Delete") { _, _ ->
+                    viewLifecycleOwner.lifecycleScope.launch {
+                        try {
+                            val reviewRepository = ReviewRepository()
+                            reviewRepository.deleteReview(uid, review.id)
+                            loadUserReviews()
+                        } catch (e: Exception) {
+                            Log.e("ReviewsFragment", "Failed to delete review", e)
+                        }
+                    }
+                }
+                .setNegativeButton("Cancel", null)
+                .show()
         }
     }
 
