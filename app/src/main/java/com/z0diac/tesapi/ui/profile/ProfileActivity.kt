@@ -86,6 +86,10 @@ class ProfileActivity : AppCompatActivity() {
             finish()
         }
 
+        supportFragmentManager.setFragmentResultListener("review_updated", this) { _, _ ->
+            refreshUserData()
+        }
+
     }
 
     private fun setupViewPager(userId: String) {
@@ -101,4 +105,33 @@ class ProfileActivity : AppCompatActivity() {
             }
         }.attach()
     }
+
+    private fun refreshUserData() {
+        val user = auth.currentUser ?: return
+
+        lifecycleScope.launch {
+            try {
+                val userRepository = UserRepository()
+                val reviewRepository = ReviewRepository()
+
+                val userData = userRepository.getUser(user.uid)
+                tvUsername.text = userData?.username ?: "No username"
+
+                val reviews = reviewRepository.getUserReviews(user.uid)
+                tvReviewsCount.text = reviews.size.toString()
+
+                val watchlist = userRepository.getWatchlist(user.uid)
+                tvWatchlistCount.text = watchlist.size.toString()
+
+                val favorites = userRepository.getFavorites(user.uid)
+                tvFavoritesCount.text = favorites.size.toString()
+            } catch (e: Exception) {
+                tvUsername.text = "Error loading data"
+                tvReviewsCount.text = "-"
+                tvWatchlistCount.text = "-"
+                tvFavoritesCount.text = "-"
+            }
+        }
+    }
+
 }

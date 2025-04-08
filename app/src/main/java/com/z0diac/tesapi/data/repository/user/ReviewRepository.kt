@@ -18,23 +18,28 @@ class ReviewRepository {
     }
 
     suspend fun updateReview(userId: String, review: Review) {
-        usersCollection
-            .document(userId)
-            .collection("reviews")
-            .document(review.id)
-            .set(review)
-            .await()
+        val userReviewRef = db.collection("users").document(userId)
+            .collection("reviews").document(review.id)
+        val movieReviewRef = db.collection("movies").document(review.movieId.toString())
+            .collection("reviews").document(review.id)
+
+        val reviewMap = mapOf(
+            "rating" to review.rating,
+            "reviewText" to review.reviewText,
+            "timestamp" to review.timestamp
+        )
+
+        userReviewRef.update(reviewMap).await()
+        movieReviewRef.update(reviewMap).await()
     }
 
-    suspend fun deleteReview(userId: String, reviewId: String) {
-        usersCollection
-            .document(userId)
-            .collection("reviews")
-            .document(reviewId)
-            .delete()
-            .await()
+    suspend fun deleteReview(userId: String, reviewId: String, movieId: String) {
+        val userReviewRef = db.collection("users").document(userId)
+            .collection("reviews").document(reviewId)
+        val movieReviewRef = db.collection("movies").document(movieId)
+            .collection("reviews").document(reviewId)
+
+        userReviewRef.delete().await()
+        movieReviewRef.delete().await()
     }
-
-
-
 }

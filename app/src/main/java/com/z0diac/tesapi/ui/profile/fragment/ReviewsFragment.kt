@@ -86,6 +86,7 @@ class ReviewsFragment : Fragment() {
                         emptyView.visibility = View.GONE
                         reviewsAdapter.updateReviews(reviews)
                     }
+                    parentFragmentManager.setFragmentResult("review_updated", Bundle())
                 }
             } catch (e: Exception) {
                 Log.e("ReviewsFragment", "Error loading reviews", e)
@@ -149,7 +150,7 @@ class ReviewsFragment : Fragment() {
                     viewLifecycleOwner.lifecycleScope.launch {
                         try {
                             val reviewRepository = ReviewRepository()
-                            reviewRepository.deleteReview(uid, review.id)
+                            reviewRepository.deleteReview(uid, review.id, review.movieId.toString())
                             loadUserReviews()
                         } catch (e: Exception) {
                             Log.e("ReviewsFragment", "Failed to delete review", e)
