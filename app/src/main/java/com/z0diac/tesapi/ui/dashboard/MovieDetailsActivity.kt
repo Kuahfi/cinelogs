@@ -69,27 +69,18 @@ class MovieDetailsActivity : AppCompatActivity() {
         apiKey = getString(R.string.tmdb_api_key)
         db = FirebaseFirestore.getInstance()
 
-        // Initialize user repository
         userRepository = UserRepository()
         currentUserId = userRepository.getCurrentUserId()
 
-        // Initialize loading views
         loadingContainer = findViewById(R.id.loadingContainer)
         contentScrollView = findViewById(R.id.contentScrollView)
         blurOverlay = findViewById(R.id.blurOverlay)
-
-        // Initialize buttons with the correct type - MaterialButton instead of ImageButton
         btnFavorite = findViewById(R.id.btnFavorite)
         btnWatchlist = findViewById(R.id.btnWatchlist)
-
-        // Show loading state
         showLoadingState(true)
 
-        // Inside onCreate()
         val btnBack: ImageButton = findViewById(R.id.btnBack)
-        btnBack.setOnClickListener {
-            finish()
-        }
+        btnBack.setOnClickListener { finish() }
 
         val btnWriteReview: MaterialButton = findViewById(R.id.btnWriteReview)
         btnWriteReview.setOnClickListener {
@@ -98,7 +89,6 @@ class MovieDetailsActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            // Check if user has already reviewed this movie before showing dialog
             lifecycleScope.launch {
                 try {
                     val firestore = FirebaseFirestore.getInstance()
@@ -116,7 +106,6 @@ class MovieDetailsActivity : AppCompatActivity() {
                     }
                 } catch (e: Exception) {
                     Log.e("MovieDetails", "Error checking existing review", e)
-                    // If there's an error checking, still allow user to try submitting a review
                     showReviewDialog()
                 }
             }
@@ -127,44 +116,59 @@ class MovieDetailsActivity : AppCompatActivity() {
         rvReviews.layoutManager = LinearLayoutManager(this)
         rvReviews.adapter = reviewAdapter
 
-        // Get movie data from intent
-        val movie = intent.getParcelableExtra<Movie1>("MOVIE_DATA")
-        if (movie != null) {
-            currentMovie = movie
+        // ✅ Ambil data dari intent SECARA MANUAL
+        val movieId = intent.getIntExtra("movie_id", 0)
+        val movieTitle = intent.getStringExtra("movie_title") ?: ""
+        val moviePoster = intent.getStringExtra("movie_poster") ?: ""
+        val movieBackdrop = intent.getStringExtra("movie_backdrop")
+        val movieReleaseDate = intent.getStringExtra("movie_release_date") ?: ""
+        val movieRating = intent.getFloatExtra("movie_rating", 0f)
+        val movieOverview = intent.getStringExtra("movie_overview") ?: ""
+        Log.d("MovieDetails", "movieId=$movieId, moviePoster=$moviePoster")
 
-            // Now that currentMovie is initialized, we can fetch reviews
-            fetchReviews(currentMovie.id)
-
-            val ivBackdrop: ImageView = findViewById(R.id.ivMoviePoster)
-            val tvTitle: TextView = findViewById(R.id.tvMovieTitle)
-            val tvFormattedReleaseDate: TextView = findViewById(R.id.tvReleaseYear)
-            val tvRating: TextView = findViewById(R.id.tvRating)
-            val tvRuntime: TextView = findViewById(R.id.tvDuration)
-            val tvSynopsis: TextView = findViewById(R.id.tvOverview)
-            val btnWatchTrailer: FloatingActionButton = findViewById(R.id.fabPlayTrailer)
-            val rvCast: RecyclerView = findViewById(R.id.rvCast)
-
-            // Setup RecyclerView with horizontal orientation for cast
-            rvCast.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-
-            // Set movie title immediately (even during loading)
-            tvTitle.text = movie.title
-
-            // Load blurred backdrop image first
-            loadBlurredBackdrop(movie, ivBackdrop)
-
-            // Fetch movie details
-            fetchMovieDetails(movie, ivBackdrop, tvFormattedReleaseDate, tvRating,
-                tvRuntime, tvSynopsis, btnWatchTrailer, rvCast)
-
-            // Set up favorite and watchlist buttons
-            setupFavoriteAndWatchlistButtons(movie)
-        } else {
-            // Handle missing movie data
+        if (movieId == 0 || moviePoster.isEmpty()) {
             Toast.makeText(this, "Error: Movie data not found", Toast.LENGTH_SHORT).show()
             finish()
+            return
         }
+
+        val movie = Movie1(
+            id = intent.getIntExtra("movie_id", 0),
+            title = intent.getStringExtra("movie_title") ?: "",
+            posterPath = intent.getStringExtra("movie_poster") ?: "",
+            backdropPath = intent.getStringExtra("movie_backdrop"),
+            releaseDate = intent.getStringExtra("movie_release_date") ?: "",
+            rating = intent.getFloatExtra("movie_rating", 0f),
+            overview = intent.getStringExtra("movie_overview") ?: "",
+            genres = emptyList(), // Nggak dikirim, nanti diisi dari API
+            runtime = 0,
+            credits = null
+        )
+
+        currentMovie = movie
+        fetchReviews(currentMovie.id)
+
+        val ivBackdrop: ImageView = findViewById(R.id.ivMoviePoster)
+        val tvTitle: TextView = findViewById(R.id.tvMovieTitle)
+        val tvFormattedReleaseDate: TextView = findViewById(R.id.tvReleaseYear)
+        val tvRating: TextView = findViewById(R.id.tvRating)
+        val tvRuntime: TextView = findViewById(R.id.tvDuration)
+        val tvSynopsis: TextView = findViewById(R.id.tvOverview)
+        val btnWatchTrailer: FloatingActionButton = findViewById(R.id.fabPlayTrailer)
+        val rvCast: RecyclerView = findViewById(R.id.rvCast)
+
+        rvCast.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        tvTitle.text = movie.title
+        loadBlurredBackdrop(movie, ivBackdrop)
+
+        fetchMovieDetails(
+            movie, ivBackdrop, tvFormattedReleaseDate, tvRating,
+            tvRuntime, tvSynopsis, btnWatchTrailer, rvCast
+        )
+
+        setupFavoriteAndWatchlistButtons(movie)
     }
+
 
     private fun setupFavoriteAndWatchlistButtons(movie: Movie1) {
         // Initialize buttons with default states
@@ -255,7 +259,8 @@ class MovieDetailsActivity : AppCompatActivity() {
                         // Add to watchlist
                         val userMovie = UserMovieList(
                             movieId = movie.id,
-                            posterPath = movie.backdropPath,
+                            posterPath = movie.posterPath,
+                            backdropPath = movie.backdropPath,
                             title = movie.title
                         )
                         userRepository.addToWatchlist(userId, userMovie)
@@ -266,6 +271,9 @@ class MovieDetailsActivity : AppCompatActivity() {
                         updateWatchlistButtonUI(isInWatchlist)
                         val message = if (isInWatchlist) "Added to watchlist" else "Removed from watchlist"
                         Toast.makeText(this@MovieDetailsActivity, message, Toast.LENGTH_SHORT).show()
+
+                        // ✅ Tambahkan ini
+                        setResult(RESULT_OK)
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -280,6 +288,7 @@ class MovieDetailsActivity : AppCompatActivity() {
             }
         }
     }
+
 
     private fun updateFavoriteButtonUI(isFavorite: Boolean) {
         // Update icon for MaterialButton

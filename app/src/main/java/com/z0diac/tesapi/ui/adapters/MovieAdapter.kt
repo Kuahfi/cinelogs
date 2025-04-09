@@ -53,10 +53,18 @@ class MovieAdapter(
                 .into(poster)
 
             itemView.setOnClickListener {
-                val intent = Intent(itemView.context, MovieDetailsActivity::class.java)
-                intent.putExtra("MOVIE_DATA", movie.copy(genres = movie.genres ?: emptyList()))
+                val intent = Intent(itemView.context, MovieDetailsActivity::class.java).apply {
+                    putExtra("movie_id", movie.id)
+                    putExtra("movie_title", movie.title)
+                    putExtra("movie_poster", movie.posterPath)
+                    putExtra("movie_backdrop", movie.backdropPath ?: "")
+                    putExtra("movie_release_date", movie.releaseDate)
+                    putExtra("movie_rating", movie.rating ?: 0f)
+                    putExtra("movie_overview", movie.overview)
+                }
                 itemView.context.startActivity(intent)
             }
+
         }
     }
 

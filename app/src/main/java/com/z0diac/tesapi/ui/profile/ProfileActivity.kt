@@ -90,6 +90,9 @@ class ProfileActivity : AppCompatActivity() {
             refreshUserData()
         }
 
+        supportFragmentManager.setFragmentResultListener("watchlist_updated", this) { _, _ ->
+            refreshUserData()
+        }
     }
 
     private fun setupViewPager(userId: String) {

@@ -4,5 +4,6 @@ data class UserMovieList(
     val movieId: Int = 0,
     val addedAt: Long = System.currentTimeMillis(),
     val posterPath: String? = null,
+    val backdropPath: String? = null,
     val title: String = ""
 )
