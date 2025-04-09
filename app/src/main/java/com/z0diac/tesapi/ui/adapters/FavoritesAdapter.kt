@@ -9,10 +9,10 @@ import com.bumptech.glide.Glide
 import com.z0diac.tesapi.R
 import com.z0diac.tesapi.data.model.Movie1
 
-class WatchlistAdapter(
+class FavoritesAdapter(
     private var movies: MutableList<Movie1>,
     private val onMovieClick: (Movie1) -> Unit
-) : RecyclerView.Adapter<WatchlistAdapter.MovieViewHolder>() {
+) : RecyclerView.Adapter<FavoritesAdapter.MovieViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MovieViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_movie, parent, false)
@@ -20,7 +20,7 @@ class WatchlistAdapter(
     }
 
     override fun getItemCount(): Int {
-        return movies.size // No +1 here, as we don't need the load more button
+        return movies.size
     }
 
     override fun onBindViewHolder(holder: MovieViewHolder, position: Int) {
@@ -42,4 +42,9 @@ class WatchlistAdapter(
         }
     }
 
+    fun updateMovies(newMovies: List<Movie1>) {
+        movies.clear()
+        movies.addAll(newMovies)
+        notifyDataSetChanged()
+    }
 }

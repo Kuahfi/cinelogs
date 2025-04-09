@@ -56,10 +56,8 @@ class WatchlistFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // ✅ Register result launcher
         detailLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                // Refresh list dan trigger update count di ProfileActivity
+            if (result.resultCode == Activity.RESULT_OK && isAdded) {
                 loadWatchlist()
                 parentFragmentManager.setFragmentResult("watchlist_updated", Bundle())
             }
@@ -93,6 +91,8 @@ class WatchlistFragment : Fragment() {
         db.collection("users").document(userIdToLoad).collection("watchlist")
             .get()
             .addOnSuccessListener { result ->
+                if (!isAdded) return@addOnSuccessListener
+
                 watchlist.clear()
                 for (document in result) {
                     try {
@@ -135,11 +135,9 @@ class WatchlistFragment : Fragment() {
                 }
 
                 adapter.notifyDataSetChanged()
-
-                // ✅ Trigger ProfileActivity untuk update count
-                parentFragmentManager.setFragmentResult("watchlist_updated", Bundle())
             }
             .addOnFailureListener { e ->
+                if (!isAdded) return@addOnFailureListener
                 Toast.makeText(requireContext(), "Failed to load watchlist: ${e.message}", Toast.LENGTH_SHORT).show()
                 binding.tvEmptyWatchlist.visibility = View.VISIBLE
                 binding.recyclerViewWatchlist.visibility = View.GONE

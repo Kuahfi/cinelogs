@@ -29,6 +29,7 @@ class ProfileActivity : AppCompatActivity() {
     private lateinit var btnLogout: Button
     private lateinit var viewPager: ViewPager2
     private lateinit var tabLayout: TabLayout
+    private var userId: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,31 +54,9 @@ class ProfileActivity : AppCompatActivity() {
         tvEmail.text = user?.email ?: "No email (Anonymous)"
 
         user?.uid?.let { uid ->
+            userId = uid
             setupViewPager(uid)
-
-            lifecycleScope.launch {
-                try {
-                    val userRepository = UserRepository()
-                    val reviewRepository = ReviewRepository()
-
-                    val userData = userRepository.getUser(uid)
-                    tvUsername.text = userData?.username ?: "No username"
-
-                    val reviews = reviewRepository.getUserReviews(uid)
-                    tvReviewsCount.text = reviews.size.toString()
-
-                    val watchlist = userRepository.getWatchlist(uid)
-                    tvWatchlistCount.text = watchlist.size.toString()
-
-                    val favorites = userRepository.getFavorites(uid)
-                    tvFavoritesCount.text = favorites.size.toString()
-                } catch (e: Exception) {
-                    tvUsername.text = "Error loading data"
-                    tvReviewsCount.text = "-"
-                    tvWatchlistCount.text = "-"
-                    tvFavoritesCount.text = "-"
-                }
-            }
+            refreshUserData()
         }
 
         btnLogout.setOnClickListener {
@@ -92,6 +71,17 @@ class ProfileActivity : AppCompatActivity() {
 
         supportFragmentManager.setFragmentResultListener("watchlist_updated", this) { _, _ ->
             refreshUserData()
+        }
+
+        supportFragmentManager.setFragmentResultListener("favorites_updated", this) { _, _ ->
+            refreshUserData()
+        }
+
+        // ✅ Auto refresh all fragments when data changed in MovieDetailsActivity
+        supportFragmentManager.setFragmentResultListener("refresh_tabs", this) { _, _ ->
+            userId?.let {
+                setupViewPager(it)
+            }
         }
     }
 
@@ -136,5 +126,4 @@ class ProfileActivity : AppCompatActivity() {
             }
         }
     }
-
 }

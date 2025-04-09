@@ -221,7 +221,8 @@ class MovieDetailsActivity : AppCompatActivity() {
                         // Add to favorites
                         val userMovie = UserMovieList(
                             movieId = movie.id,
-                            posterPath = movie.backdropPath,
+                            posterPath = movie.posterPath, // ✅ Samakan dengan watchlist
+                            backdropPath = movie.backdropPath,
                             title = movie.title
                         )
                         userRepository.addToFavorites(userId, userMovie)
@@ -232,6 +233,9 @@ class MovieDetailsActivity : AppCompatActivity() {
                         updateFavoriteButtonUI(isInFavorites)
                         val message = if (isInFavorites) "Added to favorites" else "Removed from favorites"
                         Toast.makeText(this@MovieDetailsActivity, message, Toast.LENGTH_SHORT).show()
+
+                        // ✅ Tambahkan juga untuk trigger refresh setelah balik dari MovieDetailsActivity
+                        setResult(RESULT_OK)
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -246,6 +250,7 @@ class MovieDetailsActivity : AppCompatActivity() {
             }
         }
     }
+
 
     private fun setupWatchlistButton(movie: Movie1, userId: String) {
         btnWatchlist.setOnClickListener {
