@@ -25,11 +25,9 @@ class ReviewAdapter(
     private val optionClickListener: OnReviewOptionClickListener? = null
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    // ViewTypes
     private val VIEW_TYPE_PROFILE = 1
     private val VIEW_TYPE_SIMPLE = 2
 
-    // ViewHolder untuk profile
     inner class ProfileViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val tvMovieTitle: TextView = itemView.findViewById(R.id.tvMovieTitle)
         val tvReviewText: TextView = itemView.findViewById(R.id.tvReviewText)
@@ -39,8 +37,8 @@ class ReviewAdapter(
         val ivMoreOptions: ImageView = itemView.findViewById(R.id.btnOptions)
     }
 
-    // ViewHolder untuk simple review
     inner class SimpleViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val ivUserAvatar: ImageView = itemView.findViewById(R.id.ivUserAvatar)
         val tvUsername: TextView = itemView.findViewById(R.id.tvUsername)
         val tvReviewContent: TextView = itemView.findViewById(R.id.tvReviewContent)
         val tvReviewDate: TextView = itemView.findViewById(R.id.tvReviewDate)
@@ -105,6 +103,13 @@ class ReviewAdapter(
             holder.tvReviewContent.text = review.reviewText
             holder.tvReviewDate.text = formatDate(review.timestamp)
             holder.rbUserRating.rating = review.rating
+
+            // ✅ Load foto profil user
+            Glide.with(holder.itemView.context)
+                .load(review.profilePictureUrl ?: R.drawable.default_profile)
+                .placeholder(R.drawable.default_profile)
+                .circleCrop()
+                .into(holder.ivUserAvatar)
         }
     }
 

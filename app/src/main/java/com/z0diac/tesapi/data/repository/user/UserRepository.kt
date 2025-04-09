@@ -121,11 +121,18 @@ class UserRepository {
 
     // Functions for reviews
     suspend fun addReview(review: Review): String {
-        // Create a new review with a unique ID
         val reviewId = UUID.randomUUID().toString()
-        val reviewWithId = review.copy(id = reviewId)
 
-        // Add to user's reviews collection
+        // Ambil data user untuk username & profilePictureUrl
+        val userData = getUser(review.userId)
+
+        val reviewWithId = review.copy(
+            id = reviewId,
+            username = userData?.username ?: review.username,
+            profilePictureUrl = userData?.profilePictureUrl // <-- Tambahan field baru
+        )
+
+        // Simpan ke subcollection users/{uid}/reviews
         usersCollection
             .document(review.userId)
             .collection("reviews")
@@ -133,7 +140,7 @@ class UserRepository {
             .set(reviewWithId)
             .await()
 
-        // Add to global reviews collection, organized by movie
+        // Simpan juga ke movies/{movieId}/reviews
         db.collection("movies")
             .document(review.movieId.toString())
             .collection("reviews")
@@ -143,4 +150,5 @@ class UserRepository {
 
         return reviewId
     }
+
 }

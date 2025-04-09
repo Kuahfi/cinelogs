@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager2.widget.ViewPager2
+import com.bumptech.glide.Glide
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import com.google.firebase.auth.FirebaseAuth
@@ -16,6 +17,7 @@ import com.z0diac.tesapi.data.repository.user.ReviewRepository
 import com.z0diac.tesapi.data.repository.user.UserRepository
 import com.z0diac.tesapi.ui.adapters.ProfileViewPagerAdapter
 import com.z0diac.tesapi.ui.auth.LoginActivity
+import de.hdodenhof.circleimageview.CircleImageView
 import kotlinx.coroutines.launch
 
 class ProfileActivity : AppCompatActivity() {
@@ -29,6 +31,7 @@ class ProfileActivity : AppCompatActivity() {
     private lateinit var btnLogout: Button
     private lateinit var viewPager: ViewPager2
     private lateinit var tabLayout: TabLayout
+    private lateinit var ivProfilePicture: CircleImageView
     private var userId: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -46,6 +49,7 @@ class ProfileActivity : AppCompatActivity() {
         btnLogout = findViewById(R.id.btnLogout)
         viewPager = findViewById(R.id.viewPager)
         tabLayout = findViewById(R.id.tabLayout)
+        ivProfilePicture = findViewById(R.id.ivProfilePicture) // ✅ Tambah inisialisasi
 
         val toolbar: Toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
@@ -77,7 +81,6 @@ class ProfileActivity : AppCompatActivity() {
             refreshUserData()
         }
 
-        // ✅ Auto refresh all fragments when data changed in MovieDetailsActivity
         supportFragmentManager.setFragmentResultListener("refresh_tabs", this) { _, _ ->
             userId?.let {
                 setupViewPager(it)
@@ -109,6 +112,13 @@ class ProfileActivity : AppCompatActivity() {
 
                 val userData = userRepository.getUser(user.uid)
                 tvUsername.text = userData?.username ?: "No username"
+
+                // ✅ Load foto profil
+                val defaultProfileUrl = "https://i.imgur.com/3J9KcDo.png"
+                Glide.with(this@ProfileActivity)
+                    .load(userData?.profilePictureUrl ?: defaultProfileUrl)
+                    .placeholder(R.drawable.default_profile)
+                    .into(ivProfilePicture)
 
                 val reviews = reviewRepository.getUserReviews(user.uid)
                 tvReviewsCount.text = reviews.size.toString()

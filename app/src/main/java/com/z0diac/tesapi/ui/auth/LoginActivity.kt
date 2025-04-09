@@ -27,6 +27,8 @@ import retrofit2.Response
 import android.content.Intent
 import java.util.*
 
+
+private const val DEFAULT_PROFILE_URL = "https://i.imgur.com/mCHMpLT.png"
 class LoginActivity : AppCompatActivity() {
 
     private lateinit var auth: FirebaseAuth
@@ -134,7 +136,8 @@ class LoginActivity : AppCompatActivity() {
                             val anonymousUser = User(
                                 uid = newUid,
                                 username = guestName,
-                                email = ""
+                                email = "",
+                                profilePictureUrl = DEFAULT_PROFILE_URL
                             )
                             userRepository.saveUser(anonymousUser)
                             Toast.makeText(this@LoginActivity,
@@ -231,7 +234,8 @@ class LoginActivity : AppCompatActivity() {
                                     val newUser = User(
                                         uid = user.uid,
                                         username = username,
-                                        email = email
+                                        email = email,
+                                        profilePictureUrl = DEFAULT_PROFILE_URL
                                     )
                                     userRepository.saveUser(newUser)
 

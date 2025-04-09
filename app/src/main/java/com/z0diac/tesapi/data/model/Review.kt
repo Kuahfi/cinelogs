@@ -12,5 +12,6 @@ data class Review(
     val rating: Float = 0f,
     val timestamp: Long = System.currentTimeMillis(),
     val date: Date? = null,
+    val profilePictureUrl: String? = null,
     val posterPath: String? = null
 )

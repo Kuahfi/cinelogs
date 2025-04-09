@@ -509,9 +509,11 @@ class MovieDetailsActivity : AppCompatActivity() {
             lifecycleScope.launch {
                 try {
                     val userRepo = UserRepository()
-                    val user = userRepo.getUser(currentUserId) ?: User(currentUserId, "Anonymous")
+                    val user = userRepo.getUser(currentUserId) ?: User(currentUserId, "Anonymous", "", "")
 
-                    // Cek apakah user sudah pernah review film ini
+                    // Fetch profile picture URL if available
+                    val profilePictureUrl = user.profilePictureUrl ?: "default_profile_url"
+
                     // Check if user has already reviewed this movie
                     val firestore = FirebaseFirestore.getInstance()
                     val existingReview = firestore.collection("movies")
@@ -535,7 +537,8 @@ class MovieDetailsActivity : AppCompatActivity() {
                         rating = rating,
                         reviewText = reviewText,
                         timestamp = System.currentTimeMillis(),
-                        posterPath = currentMovie.posterPath
+                        posterPath = currentMovie.posterPath,
+                        profilePictureUrl = profilePictureUrl // Add profile picture URL to review
                     )
 
                     val reviewId = userRepo.addReview(review)
@@ -550,12 +553,10 @@ class MovieDetailsActivity : AppCompatActivity() {
             }
         }
 
-
-
-
         dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
         dialog.show()
     }
+
 
     private fun fetchReviews(movieId: Int) {
         Log.d("MovieDetails", "Fetching reviews for movie ID: $movieId")
@@ -580,7 +581,8 @@ class MovieDetailsActivity : AppCompatActivity() {
                         movieTitle = data["movieTitle"] as? String ?: "",
                         rating = (data["rating"] as? Number)?.toFloat() ?: 0f,
                         reviewText = data["reviewText"] as? String ?: "",
-                        timestamp = (data["timestamp"] as? Number)?.toLong() ?: 0L
+                        timestamp = (data["timestamp"] as? Number)?.toLong() ?: 0L,
+                        profilePictureUrl = data["profilePictureUrl"] as? String ?: ""
                     )
                     reviews.add(review)
                 }
