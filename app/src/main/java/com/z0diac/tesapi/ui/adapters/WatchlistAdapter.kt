@@ -1,45 +1,45 @@
-package com.z0diac.tesapi.ui.dashboard.adapter
+package com.z0diac.tesapi.ui.adapters
 
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.z0diac.tesapi.R
-import com.z0diac.tesapi.data.model.Movie
+import com.z0diac.tesapi.data.model.Movie1
 
-class MovieAdapter(private var movies: List<Movie>) :
-    RecyclerView.Adapter<MovieAdapter.MovieViewHolder>() {
-
-    fun updateMovies(newMovies: List<Movie>) {
-        movies = newMovies
-        notifyDataSetChanged()
-    }
+class WatchlistAdapter(
+    private var movies: MutableList<Movie1>,
+    private val onMovieClick: (Movie1) -> Unit
+) : RecyclerView.Adapter<WatchlistAdapter.MovieViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MovieViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_movie, parent, false)
         return MovieViewHolder(view)
     }
 
-    override fun onBindViewHolder(holder: MovieViewHolder, position: Int) {
-        val movie = movies[position]
-        holder.bind(movie)
+    override fun getItemCount(): Int {
+        return movies.size // No +1 here, as we don't need the load more button
     }
 
-    override fun getItemCount(): Int = movies.size
+    override fun onBindViewHolder(holder: MovieViewHolder, position: Int) {
+        holder.bind(movies[position])
+    }
 
-    class MovieViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val title: TextView = itemView.findViewById(R.id.tvTitle)
+    inner class MovieViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val poster: ImageView = itemView.findViewById(R.id.ivPoster)
 
-        fun bind(movie: Movie) {
-            title.text = movie.title
+        fun bind(movie: Movie1) {
             Glide.with(itemView.context)
                 .load("https://image.tmdb.org/t/p/w500" + movie.posterPath)
                 .placeholder(R.drawable.placeholder_image)
                 .into(poster)
+
+            itemView.setOnClickListener {
+                onMovieClick(movie)
+            }
         }
     }
+
 }
