@@ -16,7 +16,7 @@ interface TmdbApi {
         @Query("page") page: Int = 1
     ): Call<MovieResponse>
 
-    @GET("movie/top_rated") // 🔥 Tambahkan endpoint Top Rated Movies
+    @GET("movie/top_rated")
     fun getTopRatedMovies(
         @Query("api_key") apiKey: String,
         @Query("page") page: Int = 1
@@ -40,5 +40,11 @@ interface TmdbApi {
         @Path("movie_id") movieId: Int,
         @Query("api_key") apiKey: String
     ): Call<Credits>
+
+    @GET("search/movie")
+    fun searchMovies(
+        @Query("api_key") apiKey: String,
+        @Query("query") query: String
+    ): Call<MovieResponse>
 
 }
