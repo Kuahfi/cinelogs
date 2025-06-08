@@ -20,6 +20,9 @@
             android:name=".ui.dashboard.MovieDetailsActivity"
             android:exported="false" />
         <activity
+            android:name=".ui.dashboard.SearchActivity"
+            android:parentActivityName=".ui.dashboard.DashboardActivity"/>
+        <activity
             android:name=".ui.onboarding.OnboardingActivity"
             android:exported="false" /> <!-- SplashScreen sebagai entry point utama -->
         <activity
