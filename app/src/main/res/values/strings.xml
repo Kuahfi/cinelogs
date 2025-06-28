@@ -5,4 +5,5 @@
     <string name="genre">%1$s</string>
     <string name="runtime_placeholder">%d min</string>
     <string name="director_placeholder">Directed by: %1$s</string>
+    <string name="app_name">Cinelogs</string>
 </resources>

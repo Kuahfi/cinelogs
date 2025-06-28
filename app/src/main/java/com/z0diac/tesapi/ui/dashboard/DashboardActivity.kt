@@ -188,7 +188,54 @@ class DashboardActivity : AppCompatActivity() {
             R.drawable.joker
         )
 
-        sliderAdapter = ImageSliderAdapter(sliderImages)
+        val tmdbMovieIds = listOf(
+            533535,  // Deadpool & Wolverine
+            872585,  // Oppenheimer
+            49519,   // The Croods
+            438631,  // Dune
+            475557   // Joker
+        )
+
+        sliderAdapter = ImageSliderAdapter(sliderImages) { position ->
+            if (position !in tmdbMovieIds.indices) {
+                Toast.makeText(this, "Invalid movie position", Toast.LENGTH_SHORT).show()
+                return@ImageSliderAdapter
+            }
+
+            val selectedMovieId = tmdbMovieIds[position]
+            val apiKey = getString(R.string.tmdb_api_key)
+
+            Log.d("SliderClick", "Selected movieId: $selectedMovieId")
+            lifecycleScope.launch(Dispatchers.IO) {
+                try {
+                    val response = RetrofitInstance.api.getMovieDetails(selectedMovieId, apiKey, "credits,genres").execute()
+                    Log.d("SliderClick", "Response success: ${response.isSuccessful}, code: ${response.code()}, message: ${response.message()}")
+
+                    withContext(Dispatchers.Main) {
+                        if (response.isSuccessful && response.body() != null) {
+                            val movie = response.body()!!
+                            val intent = Intent(this@DashboardActivity, MovieDetailsActivity::class.java)
+                            intent.putExtra("movie_id", movie.id)
+                            intent.putExtra("movie_title", movie.title)
+                            intent.putExtra("movie_poster", movie.posterPath)
+                            intent.putExtra("movie_backdrop", movie.backdropPath)
+                            intent.putExtra("movie_release_date", movie.releaseDate)
+                            intent.putExtra("movie_rating", movie.rating)
+                            intent.putExtra("movie_overview", movie.overview)
+                            startActivity(intent)
+                        } else {
+                            Toast.makeText(this@DashboardActivity, "Movie not found", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                } catch (e: Exception) {
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(this@DashboardActivity, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                        Log.e("SliderClick", "Exception during fetch", e)
+                    }
+                }
+            }
+        }
+
         binding.viewPagerSlider.adapter = sliderAdapter
         setupIndicatorDots(sliderImages.size)
 
